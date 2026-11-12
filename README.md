@@ -36,7 +36,7 @@ Stages 1 and 2 are written before the rewrite because the rewrite is judged agai
 From the 40 papers in our collection, which ranged from short research notes to a book:
 
 - **Agent time.** 773 commits over 49 working days, falling in 174 distinct clock-hours; the median paper had commits in 15 distinct hours, the range 5 to 24. Commit-hours are a rough proxy for how long an agent was working, not a measure of it.
-- **Your time.** Roughly two hours per paper: reading the errata, deciding how serious each one is, and finding the materials that settle questions the deposit cannot. That is about 80 hours for 40 papers.
+- **Your time.** Reading the errata, deciding how serious each one is, and finding the materials that settle questions the deposit cannot. For most papers this took about 15 minutes; for the hardest five, about two hours each. That is roughly 19 hours for 40 papers.
 - **Compute.** Most pipelines run in minutes. The slowest, a large simulation study, took about 14 hours on a laptop.
 
 The first papers took far longer than the last ones, because the procedure was being invented as it went. Following a written procedure should be faster.
