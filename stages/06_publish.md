@@ -26,7 +26,7 @@ The concept DOI then goes in the README and in the errata note, so that the PDF,
 
 A reader who starts from the article follows its DOI to the original deposit. For them to find the maintained version, the deposit has to point to it. On Dataverse we added a line to each deposit's *Related Material* field, giving the Zenodo DOI and the repository URL. A metadata-only change publishes a minor version (1.1, say) with the files untouched. On OSF, which has no such field, the line went into the project description.
 
-Some details from doing this for about 40 deposits:
+Some details from doing this for all of our deposits:
 
 - Deposits in your own Dataverse collection can be published directly. Deposits in a journal's collection usually go to the journal's curators for review, which on Harvard Dataverse means agreeing to a short attestation and waiting.
 - Some older deposits lacked fields that Dataverse now requires (a subject, a contact email), and couldn't be saved until those were filled in.
@@ -42,7 +42,7 @@ A few choices made the check useful rather than noisy:
 - **Numbers are judged; figure files are not.** A PDF or PNG drawn on Linux is never byte-identical to one drawn on a Mac, so figure files are counted but don't fail the check. Every figure's plotted values are saved as a CSV, and those are judged.
 - **Floating-point noise is forgiven.** Linux and macOS differ in the last bits of some floating-point results, so a CSV whose only differences fall within a relative tolerance of one in a million is counted as noise.
 - **The schedule stays alive.** GitHub disables a scheduled workflow after 60 days without activity in the repository, which a maintained repository can easily go. The workflow re-enables itself every week.
-- **Very slow pipelines get a shorter run.** GitHub limits a job to six hours. One of our pipelines takes about 14, so on GitHub it skips its slowest deposited scripts and judges everything else, and the full run happens locally.
+- **Very slow pipelines get a shorter run.** GitHub limits a job to six hours. One of our pipelines takes far longer than that, so on GitHub it skips its slowest deposited scripts and judges everything else, and the full run happens locally.
 
 When the check fails, the cause is usually a package update. The rewrite is meant to be current code, so the response is to update the rewrite, not to pin the old package version; if a published number moves, the ground truth records it as an `environment` difference and the errata note updates when it next renders.
 

@@ -2,7 +2,7 @@
 
 The ground truth checks numbers against the pipeline. Stage 4 checks the *text*: every claim the article makes, numeric or not, gets extracted, classified, and checked a second way, by code that quotes the sentence and recomputes what it says.
 
-We added this stage after finding that the ground truth alone missed a large share of the errors. Rerunning the code found 239 of the 599 errata in our collection; reading the articles against themselves, their appendices, and their code found another 238. A pipeline that reproduces every table can still sit under a paper whose text says something the tables don't.
+We added this stage after finding that the ground truth alone missed a large share of the errors. Rerunning the code found well under half of the errata in our collection; reading the articles against themselves, their appendices, and their code found about as many again. A pipeline that reproduces every table can still sit under a paper whose text says something the tables don't.
 
 ## Extracting the claims
 
@@ -32,7 +32,7 @@ The claims most likely to change a reader's conclusion often print no number. A 
 - **persistence**: "remains detectable after two weeks";
 - **counts in words**: "most of the 24 experiments", "in every study".
 
-Each becomes a `descriptive` claim, and its check tests the statement against the rewrite's output: is the interval clear of zero, is one estimate larger than the other, does the effect still appear at the later wave. The one error in our collection that changed a conclusion was a claim of this kind. An article reported that the effects of fact-checks remained detectable more than two weeks after exposure; once a coding error was corrected, the two-week estimate could not be distinguished from zero. No single number in that sentence was the problem. The claim was.
+Each becomes a `descriptive` claim, and its check tests the statement against the rewrite's output: is the interval clear of zero, is one estimate larger than the other, does the effect still appear at the later wave. The first error we found that changed a conclusion was a claim of this kind. An article reported that the effects of fact-checks remained detectable more than two weeks after exposure; once a coding error was corrected, the two-week estimate could not be distinguished from zero. No single number in that sentence was the problem. The claim was.
 
 ## The second check
 

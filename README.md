@@ -1,6 +1,6 @@
 # Active maintenance: a guide
 
-In 2021, Limor Peer, Lilla Orr, and I proposed that researchers "actively maintain" their replication archives, updating the code as the software around it changes, so that published results stay reproducible for years rather than months (Peer, Orr, and Coppock 2021, *PS: Political Science & Politics*). For a long time, none of us did it, because it was a lot of work. With AI coding agents the work became cheap enough that I went back and did it for 40 of my published books and articles. This repository records how we did it, in enough detail that you could do the same for your own papers.
+In 2021, Limor Peer, Lilla Orr, and I proposed that researchers "actively maintain" their replication archives, updating the code as the software around it changes, so that published results stay reproducible for years rather than months (Peer, Orr, and Coppock 2021, *PS: Political Science & Politics*). For a long time, none of us did it, because it was a lot of work. With AI coding agents the work became cheap enough that I went back and did it for my published books and articles. This repository records how we did it, in enough detail that you could do the same for your own papers.
 
 The guide is written for people. Each stage also has a companion file in `agent/` that says the same thing as instructions a coding agent can follow. If the two ever disagree, the version written for people is the one we meant.
 
@@ -33,17 +33,17 @@ The archive check and the ground truth come before the rewrite because the rewri
 
 ## What it cost
 
-Across the 40 papers, which ran from two-page research notes to a book:
+Our papers ranged from two-page research notes to a book, and the cost varied with them:
 
-- **Agent time.** 773 commits over 49 working days, falling in 174 distinct clock-hours. The median paper had commits in 15 different hours, with a range of 5 to 24. Commit-hours are only a rough proxy for how long the agents worked.
-- **My time.** For most papers, about 15 minutes to read the errata and decide what to do about them. For the hardest five, about two hours each, mostly spent weighing how serious an error was and digging up old files that could explain it. Roughly 19 hours in all.
-- **Compute.** Most pipelines run in a few minutes. The slowest, a large simulation study, takes about 14 hours on a laptop.
+- **Agent time.** Most of the work is done by the agent. A typical paper took a handful of working sessions spread over a few days; a long paper with a large appendix took several times that.
+- **My time.** For most papers, about 15 minutes to read the errata and decide what to do about them. For the hardest few, about two hours each, mostly spent weighing how serious an error was and digging up old files that could explain it.
+- **Compute.** Most pipelines run in a few minutes. Our slowest, a large simulation study, takes most of a day on a laptop.
 
 The early papers took far longer than the later ones, because we were working out the procedure as we went. With the procedure written down, a new paper should go faster.
 
 ## What it found
 
-Of the 17,354 claims our 40 papers print, 322 (1.9%) were wrong. Thirty-three of the 40 printed at least one wrong number, and all 40 printed a mistake of some kind, typos and reference errors included. Most errors were small: a number in the text left over from an earlier draft, a value rounded the wrong way, two panels of a figure in the wrong order. One changed a conclusion, and we sent a corrigendum to the journal. If your experience is like ours, you will find errors too.
+Errors turned out to be common. A small share of all the claims our papers print were wrong, but most of the papers printed at least one wrong number, and nearly all of them had a mistake of some kind once typos and reference errors are counted. Most errors were small: a number in the text left over from an earlier draft, a value rounded the wrong way, two panels of a figure in the wrong order. Errors that change a conclusion were rare, and when we found one we sent a corrigendum to the journal. If your experience is like ours, you will find errors too.
 
 ## Languages other than R
 

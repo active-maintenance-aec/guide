@@ -44,7 +44,7 @@ The pipeline can tell you that a number is wrong. Whether that changes a conclus
 Most of the errors we found were embarrassing but trivial, and the scientific contribution of each paper stands without them. Sending dozens of journals a correction for every typo and rounding slip would bury the editors and devalue corrections as a signal. We used three tiers:
 
 1. **Every error** goes in the errata note, beside the maintained code, where anyone reading the repository will find it.
-2. **An error that changes the direction or implications of a finding a reader would rely on** also goes to the journal as a corrigendum, whether or not the finding appears in the abstract. In our 40 papers, one error met this bar.
+2. **An error that changes the direction or implications of a finding a reader would rely on** also goes to the journal as a corrigendum, whether or not the finding appears in the abstract. In our experience, errors that meet this bar are rare.
 3. **Retraction** is for findings that can no longer be relied on at all. None of ours came close.
 
 When a corrigendum was warranted, we used it to correct the related errors in the same article as well. The reasoning behind the tiers is in [`rules/severity.md`](../rules/severity.md), and the `disposition` column in the ground truth records which tier each error landed in.
