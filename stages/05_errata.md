@@ -14,7 +14,7 @@ We counted any statement printed in the article, its appendix, or its references
 - spelling and typesetting mistakes;
 - reference-list errors, which were common (much of my early bibliography came from search-engine citations that were themselves wrong).
 
-We left out three things. A value that differs from our computation only within the estimator's own noise is not an error (see [`rules/stochastic.md`](../rules/stochastic.md)). A finding we couldn't judge either way is recorded as `unresolved` in the ground truth rather than corrected. And an analysis choice we would now make differently is not an error at all (see [`rules/erratum.md`](../rules/erratum.md)).
+We left out three things. A value that differs from our computation only within the estimator's own noise is not an error (see [`rules/stochastic.md`](../rules/stochastic.md)). A finding we couldn't judge either way is recorded as `unresolved` in the ground truth rather than corrected. An analysis choice we would now make differently is not an error at all (see [`rules/erratum.md`](../rules/erratum.md)).
 
 When the prose disagreed with the paper's own table and our computation supported the table, we corrected the sentence to match the table.
 
