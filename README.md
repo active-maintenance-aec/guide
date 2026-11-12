@@ -24,10 +24,10 @@ Each repository then got a permanent DOI from Zenodo, a link back from the origi
 | [0. Setup and style](stages/00_setup.md) | Gather the paper and anything else that can settle a question about it; set up the repository; write down how you like your code written. | `STYLE.md`, the published PDFs, the repository skeleton |
 | [1. Archive check](stages/01_archive_check.md) | Fetch and verify the deposit, and run it as it was shipped. | `original_manifest.csv`, `download_original.R`, `archive_run_status.csv`, `archive_overwrites.csv` |
 | [2. Ground truth](stages/02_ground_truth.md) | List every number the paper prints, and compare each with the archive and the rewrite. | `<paper_id>_ground_truth.csv`, `float_coverage.csv` |
-| 3. Maintained rewrite | Rewrite the code, one script per table or figure, on current packages. | `maintained/`, `maintained/output/` |
-| 4. Claims | Extract every claim in the text, numeric or not, and check each one a second way. | `published_claims.csv`, `in_text_claims.R` |
-| 5. Errata | Write up each error with a computed correction, and decide which, if any, belong in a journal notice. | `errata.qmd`, `<paper_id>_errata.pdf`, `errata_entries.csv` |
-| 6. Report and publish | Render the README, publish and archive the repository, link the deposit to it, and schedule the check. | `README.qmd`, a DOI, a scheduled check |
+| [3. Maintained rewrite](stages/03_rewrite.md) | Rewrite the code, one script per table or figure, on current packages. | `maintained/`, `maintained/output/` |
+| [4. Claims](stages/04_claims.md) | Extract every claim in the text, numeric or not, and check each one a second way. | `published_claims.csv`, `in_text_claims.R` |
+| [5. Errata](stages/05_errata.md) | Write up each error with a computed correction, and decide which, if any, belong in a journal notice. | `errata.qmd`, `<paper_id>_errata.pdf`, `errata_entries.csv` |
+| [6. Report and publish](stages/06_publish.md) | Render the README, publish and archive the repository, link the deposit to it, and schedule the check. | `README.qmd`, a DOI, a scheduled check |
 
 The archive check and the ground truth come before the rewrite because the rewrite is judged against them. The ground truth also starts from the article rather than from the code, for a reason Stage 2 explains: a number the pipeline never computes would otherwise never be compared with anything.
 
