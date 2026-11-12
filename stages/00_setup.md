@@ -1,44 +1,40 @@
 # Stage 0: Setup and style
 
-**Purpose.** Assemble everything that can settle a question about the paper, scaffold the repository, and write down how you write code, before any code is written.
+Before writing any code, we gathered everything that might help answer a question about the paper, set up the repository, and wrote down how we wanted the new code to look.
 
-## 0.1 The published record
+## The published record
 
-Collect, as the publisher's rendered PDFs:
+We worked from the publisher's rendered PDFs: the article itself (the version of record), the online appendix, and any corrigendum already published. A published corrigendum is an analysis too, and we checked it against its own materials like everything else.
 
-- the article (the version of record, not the preprint or the accepted manuscript);
-- the online appendix or supplementary materials;
-- any published corrigendum or erratum, which is itself a published analysis to be checked against its own materials.
+We learned to avoid preprints and accepted manuscripts as sources for published values. They often differ from the final article in small ways (a number updated in proofs, a table reordered, a sentence reworded), and comparing against the wrong version produced errata that weren't real.
 
-Every published value in later stages is read from these files. A value taken from a preprint is a value from a different document: preprints differ from the version of record in numbers, tables, and wording, and comparing against one manufactures errata.
+## The deposit
 
-## 0.2 The deposit
+Next we found the replication deposit (ours were on Dataverse and OSF) and recorded its DOI. We left the data where they were. Stage 1 writes a script that downloads the deposit and checks each file against a manifest, so the journal's archive stays the single source for the data.
 
-Find the replication deposit (Dataverse, OSF, ICPSR, a journal archive) and record its DOI. You will not copy the data into your repository. Stage 1 writes a script that downloads the deposit and checks every file against a manifest, so there is exactly one source of truth for the data: the archive the journal points to.
+## Materials outside the deposit
 
-## 0.3 Your own materials outside the deposit
+Some of the most useful evidence was not in the deposit at all. Depending on the paper, we had:
 
-Look for what you kept that the deposit does not contain:
-
-- the final production files (the `.tex` or `.docx` you sent to the publisher);
-- the proofs, and your marked-up corrections to them;
+- the final production files sent to the publisher (`.tex` or `.docx`);
+- the proofs, with our marked-up corrections;
 - the accepted manuscript;
-- older scripts and intermediate files from your working folders.
+- older scripts and intermediate files from our working folders.
 
-None of these is an input to the rewrite. Their job is to settle questions the deposit cannot. Was a wrong number in the text a typo, or a number left over from an earlier run? Did an error enter in typesetting, or was it already in your manuscript? What did the code look like when the paper was written? An erratum found this way records its source (`authors_archive` or `proof`; see [the errata schema](../schemas/errata_entries.md)).
+None of these fed into the rewrite. What they did was settle questions the deposit couldn't. When the text printed a wrong number, was it a typo, or a number left over from an earlier run? Did an error enter during typesetting, or was it already in our manuscript? What did the code look like when we wrote the paper? When one of these files settled a question, the erratum records it as its source (`authors_archive` or `proof`; see [the errata schema](../schemas/errata_entries.md)).
 
-Two cautions. A `.tex` in a working folder may be a draft from before copyediting, so do not treat it as the published text unless you can show it is (the strongest evidence is a compiled PDF identical to the publisher's). And materials that were never public cannot be the only basis for a correction a reader is asked to trust; use them to explain an error, and keep the correction itself grounded in the published record and the deposited data.
+Two lessons from using them. A `.tex` file from a working folder can be a draft from before copyediting; we treated one as the published text only when its compiled PDF matched the publisher's byte for byte. And because files that were never public can't be checked by a reader, we used them to explain errors, and kept each correction itself grounded in the published article and the deposited data.
 
-## 0.4 Scaffold
+## The repository
 
-Create the repository with:
+Each repository has:
 
-- a single entry point (`run_all.R`, a master `.do` file, or a Python script) that runs every stage in order and stops on the first failure;
-- a project file or root marker, so that every path is relative to the repository root (`here` in R, a root global in Stata, `pathlib` in Python), with no absolute paths and no `setwd`;
-- a `.gitignore` that excludes the downloaded deposit;
-- a license. We use CC0 for the code, and we do not redistribute the data.
+- a single entry point (`run_all.R` for us; a master `.do` file or a Python script would do the same job) that runs everything in order and stops at the first failure;
+- paths relative to the repository root (we used the `here` package), so the code runs on anyone's machine;
+- a `.gitignore` that keeps the downloaded deposit out of version control;
+- a license. We used CC0 for the code and did not redistribute the data.
 
-The folder layout we use:
+Our folder layout:
 
 ```
 run_all.R
@@ -47,38 +43,38 @@ original_manifest.csv
 STYLE.md
 maintained/            # the rewrite, one script per table or figure
 maintained/output/     # everything the rewrite writes
-ground_truth/          # the comparison tables and their builders
+ground_truth/          # the comparison tables and the scripts that build them
 errata.qmd
 README.qmd
 ```
 
-## 0.5 Style investigation
+## Style investigation
 
-A maintained rewrite is code you will read, and others will read, for years. It should look like code you would write today. The agent cannot know what that means until it has read your code.
+A rewrite is code that you and others will be reading for years, so it should look like code you'd write today. My own habits have changed a lot since graduate school, and the rewrite was a chance to bring old projects up to how I work now. An agent can't know what that means without reading some of your code, so we made the question an explicit step.
 
-1. **Gather recent code you wrote** and are happy with, ideally from more than one project. Recent matters: most of us write very differently than we did ten years ago, and the rewrite is a chance to bring old work up to current practice.
-2. **Have the agent draft `STYLE.md`** from what it reads. It should cover, with examples from your own code:
-   - how scripts are organized (one per table or figure, separate cleaning and analysis, a shared helpers file, a header comment);
-   - naming (files, objects, columns);
-   - data-frame idioms (the pipe, how you reshape, how you join, how you recode);
-   - modeling defaults (which estimator, which standard errors, which packages);
-   - figures (theme, how intervals are drawn, file formats, and the habit of writing a CSV of every plotted quantity beside the figure);
-   - tables (which package, which format);
-   - anything you never do.
-3. **Read it, correct it, and approve it.** The draft will get some things wrong, and the corrections are the most valuable part. Commit the approved `STYLE.md`; every later stage follows it.
+1. **Gather some recent code** that you're happy with, ideally from more than one project.
+2. **Have the agent draft a `STYLE.md`** from what it reads. Ours covered, with examples drawn from the code itself:
+   - how scripts are organized (one per table or figure, cleaning separate from analysis, a shared helpers file, a short header comment);
+   - naming of files, objects, and columns;
+   - how data get reshaped, joined, and recoded;
+   - modeling defaults (estimators, standard errors, packages);
+   - figures (theme, how intervals are drawn, file formats, and a CSV of the plotted values saved next to each figure);
+   - tables;
+   - anything to avoid.
+3. **Read the draft, fix it, and approve it.** The draft gets some things wrong, and fixing those turned out to be where most of the value was. The approved file is committed, and the rewrite follows it.
 
-`STYLE.md` governs *how the code looks*. It never overrides what the rewrite must do, which is fixed for everyone:
+`STYLE.md` covers how the code *looks*. A few things about what the rewrite *does* stay the same whatever your style:
 
-- reproduce every number, table, and figure the paper prints, or document why not;
-- run on current versions of every package;
-- read the data exactly as deposited, never an edited copy;
-- keep the original estimator, specification, sample, and seed, even where you would now choose differently (a choice you would make differently today is not an error; see [what counts as an erratum](../rules/erratum.md));
-- never use a published number as an input.
+- it reproduces every number, table, and figure the paper prints, or documents why it can't;
+- it runs on current versions of every package;
+- it reads the data exactly as deposited;
+- it keeps the paper's original estimator, specification, sample, and seed, even where you'd now choose differently (a choice you would make differently today isn't an error; see [what counts as an erratum](../rules/erratum.md));
+- it never uses a published number as an input.
 
-Where a style preference and one of these rules conflict, the rule wins. A common case: if your current default is a different robust variance estimator than the one the paper used, the rewrite uses the paper's.
+When a style preference and one of these conflict, the paper's choices win. The case we hit most often: my current default standard errors differ from what some of the older papers used, and the rewrites kept the originals.
 
-An example `STYLE.md`, from the papers in our collection, is in [`examples/STYLE_example.md`](../examples/STYLE_example.md). It is one person's taste, included to show the level of detail that works, not as a recommendation.
+There's an example `STYLE.md` from our collection in [`examples/STYLE_example.md`](../examples/STYLE_example.md). It is one person's taste, and is there to show the level of detail that worked for us.
 
-## Gate
+## Done when
 
-Stage 0 is done when the repository exists with its entry point and layout, the published PDFs are in hand, the deposit DOI is recorded, and `STYLE.md` is committed with your approval.
+The repository exists with its entry point and layout, the published PDFs are in hand, the deposit DOI is recorded, and an approved `STYLE.md` is committed.

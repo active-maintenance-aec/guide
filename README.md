@@ -1,65 +1,65 @@
 # Active maintenance: a guide
 
-This guide is for a researcher who has published a paper with a replication archive and wants the archive to keep working. The method is *active maintenance*: rewrite the cleaning and analysis code so it runs on current software, check every number the paper prints against both the original code and the rewrite, and publish an itemized list of any errors found, beside the maintained code. The proposal is Peer, Orr, and Coppock (2021), "Active Maintenance: A Proposal for the Long-Term Computational Reproducibility of Scientific Results," *PS: Political Science & Politics*. This guide is the procedure that came out of doing it, with AI coding agents, for 40 published books and articles.
+In 2021, Limor Peer, Lilla Orr, and I proposed that researchers "actively maintain" their replication archives, updating the code as the software around it changes, so that published results stay reproducible for years rather than months (Peer, Orr, and Coppock 2021, *PS: Political Science & Politics*). For a long time, none of us did it, because it was a lot of work. With AI coding agents the work became cheap enough that I went back and did it for 40 of my published books and articles. This repository records how we did it, in enough detail that you could do the same for your own papers.
 
-The guide is written for people. Every stage also has an agent file in `agent/` that gives the same instructions as imperatives, so that a coding agent can follow them. Where the two disagree, the human document is right and the agent file is a bug.
+The guide is written for people. Each stage also has a companion file in `agent/` that says the same thing as instructions a coding agent can follow. If the two ever disagree, the version written for people is the one we meant.
 
-## What you end up with
+## What a finished repository does
 
-One public repository per paper, which:
+Each paper ended up with its own public repository that:
 
-1. fetches the original deposit from its archive and verifies every file against a checksum manifest, without redistributing the data;
-2. records whether each deposited script still runs, as shipped;
+1. fetches the original deposit from its archive and checks every file against a checksum manifest (the data stay where they were deposited, and are never copied into the repository);
+2. records which of the deposited scripts still run;
 3. holds a maintained rewrite that reproduces every table, figure, and number in the text from the deposited data, on current software;
-4. holds a *ground truth*: one generated table comparing each printed number with the value the original code produces and the value the rewrite produces;
+4. holds a *ground truth*, one generated table that compares each printed number with what the original code produces and with what the rewrite produces;
 5. checks every claim in the text a second, independent way, by quoting the sentence and recomputing its number; and
-6. publishes an itemized errata note, with corrected values computed by the code rather than typed.
+6. publishes an itemized errata note, whose corrected values the code computes rather than someone typing them in.
 
-The repository then gets a permanent DOI (we use Zenodo), the original deposit gets a link to it, and a scheduled job reruns the whole pipeline every few weeks so you learn when a software update moves a number.
+Each repository then got a permanent DOI from Zenodo, a link back from the original deposit, and a scheduled job that reruns the whole pipeline every eight weeks, so that we hear about it when a package update moves a number.
 
 ## The stages
 
-| Stage | What it does | What it produces |
+| Stage | What happens | What it produces |
 |---|---|---|
-| [0. Setup and style](stages/00_setup.md) | Gather the paper and every source that can settle a question about it; scaffold the repo; write down how *you* write code. | `STYLE.md`, the published PDFs, the repo skeleton |
-| [1. Archive check](stages/01_archive_check.md) | Fetch and verify the deposit; run it as shipped. | `original_manifest.csv`, `download_original.R`, `archive_run_status.csv`, `archive_overwrites.csv` |
-| [2. Ground truth](stages/02_ground_truth.md) | Write down every number the paper prints; compare each with the archive and the rewrite. | `<paper_id>_ground_truth.csv`, `float_coverage.csv` |
-| 3. Maintained rewrite | Rewrite the code: one script per table or figure, current packages, no published number as an input. | `maintained/`, `maintained/output/` |
+| [0. Setup and style](stages/00_setup.md) | Gather the paper and anything else that can settle a question about it; set up the repository; write down how you like your code written. | `STYLE.md`, the published PDFs, the repository skeleton |
+| [1. Archive check](stages/01_archive_check.md) | Fetch and verify the deposit, and run it as it was shipped. | `original_manifest.csv`, `download_original.R`, `archive_run_status.csv`, `archive_overwrites.csv` |
+| [2. Ground truth](stages/02_ground_truth.md) | List every number the paper prints, and compare each with the archive and the rewrite. | `<paper_id>_ground_truth.csv`, `float_coverage.csv` |
+| 3. Maintained rewrite | Rewrite the code, one script per table or figure, on current packages. | `maintained/`, `maintained/output/` |
 | 4. Claims | Extract every claim in the text, numeric or not, and check each one a second way. | `published_claims.csv`, `in_text_claims.R` |
-| 5. Errata | Write up every error, with corrections computed at render; decide which, if any, need a journal notice. | `errata.qmd`, `<paper_id>_errata.pdf`, `errata_entries.csv` |
-| 6. Report and publish | Render the README, publish the repo, archive it, link the deposit back, schedule the check. | `README.qmd`, a DOI, a scheduled check |
+| 5. Errata | Write up each error with a computed correction, and decide which, if any, belong in a journal notice. | `errata.qmd`, `<paper_id>_errata.pdf`, `errata_entries.csv` |
+| 6. Report and publish | Render the README, publish and archive the repository, link the deposit to it, and schedule the check. | `README.qmd`, a DOI, a scheduled check |
 
-Stages 1 and 2 are written before the rewrite because the rewrite is judged against them. The ground truth starts from the article, not from the code, so that nothing the article prints can escape the comparison by being absent from the pipeline.
+The archive check and the ground truth come before the rewrite because the rewrite is judged against them. The ground truth also starts from the article rather than from the code, for a reason Stage 2 explains: a number the pipeline never computes would otherwise never be compared with anything.
 
-## What it costs
+## What it cost
 
-From the 40 papers in our collection, which ranged from short research notes to a book:
+Across the 40 papers, which ran from two-page research notes to a book:
 
-- **Agent time.** 773 commits over 49 working days, falling in 174 distinct clock-hours; the median paper had commits in 15 distinct hours, the range 5 to 24. Commit-hours are a rough proxy for how long an agent was working, not a measure of it.
-- **Your time.** Reading the errata, deciding how serious each one is, and finding the materials that settle questions the deposit cannot. For most papers this took about 15 minutes; for the hardest five, about two hours each. That is roughly 19 hours for 40 papers.
-- **Compute.** Most pipelines run in minutes. The slowest, a large simulation study, took about 14 hours on a laptop.
+- **Agent time.** 773 commits over 49 working days, falling in 174 distinct clock-hours. The median paper had commits in 15 different hours, with a range of 5 to 24. Commit-hours are only a rough proxy for how long the agents worked.
+- **My time.** For most papers, about 15 minutes to read the errata and decide what to do about them. For the hardest five, about two hours each, mostly spent weighing how serious an error was and digging up old files that could explain it. Roughly 19 hours in all.
+- **Compute.** Most pipelines run in a few minutes. The slowest, a large simulation study, takes about 14 hours on a laptop.
 
-The first papers took far longer than the last ones, because the procedure was being invented as it went. Following a written procedure should be faster.
+The early papers took far longer than the later ones, because we were working out the procedure as we went. With the procedure written down, a new paper should go faster.
 
-## What it finds
+## What it found
 
-Across the 40 papers, 322 of 17,354 printed claims (1.9%) were wrong, 33 of the 40 papers printed at least one wrong number, and every one printed an error of some kind. Most errors were small: a stale number in the text, a rounding slip, a mislabeled panel. One changed a conclusion and was corrected in the journal. Expect to find errors in your own work, and decide in advance that finding them is the point.
+Of the 17,354 claims our 40 papers print, 322 (1.9%) were wrong. Thirty-three of the 40 printed at least one wrong number, and all 40 printed a mistake of some kind, typos and reference errors included. Most errors were small: a number in the text left over from an earlier draft, a value rounded the wrong way, two panels of a figure in the wrong order. One changed a conclusion, and we sent a corrigendum to the journal. If your experience is like ours, you will find errors too.
 
-## Language
+## Languages other than R
 
-The stages, schemas, gates, and decision rules do not depend on a programming language. The templates and the examples are in R, because our papers were. [`languages.md`](languages.md) maps each R tool to its Stata and Python counterparts. For claim checking, the verdict rules in Stage 4 are the specification; the R package `excheckr` is one implementation of them, and they can be reimplemented in any language.
+Our papers were written in R, so the templates and examples are in R. The stages, the table formats, the checks, and the rules for judging errors are not tied to R, and [`languages.md`](languages.md) lists the Stata and Python counterparts of the R tools we used. Stage 4 describes how each claim gets its verdict; the R package `excheckr` implements those rules, and nothing stops anyone from implementing them in another language.
 
-## Repository layout
+## What is in this repository
 
-- `stages/`: one file per stage, each with its purpose, inputs, outputs, gate, and decision rules.
-- `schemas/`: the column definitions and closed vocabularies for every output table.
-- `rules/`: the judgments that recur (what counts as an erratum, rounding, simulation noise, severity).
-- `templates/`: starting files for a new repo.
-- `agent/`: the same stages as instructions for a coding agent.
-- `traps.md`: failures that will happen to you, with the fix for each.
-- `languages.md`: R, Stata, and Python counterparts.
-- `examples/`: finished repositories, and an example `STYLE.md`.
+- `stages/`: one file per stage, with its purpose, inputs, outputs, checks, and the judgment calls it involves.
+- `schemas/`: the columns and allowed values of every table the procedure produces.
+- `rules/`: the judgments that kept coming up (what counts as an erratum, rounding, simulation noise, and when an error needs a journal notice).
+- `templates/`: starting files for a new repository.
+- `agent/`: the stages as instructions for a coding agent.
+- `traps.md`: problems we ran into more than once, and how we got around them.
+- `languages.md`: Stata and Python counterparts of the R tools.
+- `examples/`: finished repositories from our collection, and an example `STYLE.md`.
 
 ## License
 
-CC0. Copy anything.
+CC0. Take whatever is useful.

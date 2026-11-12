@@ -1,92 +1,94 @@
 # Stage 2: Ground truth
 
-**Purpose.** Write down every number the paper prints, and compare each one with the value the original code produces and the value the maintained rewrite produces, in one table that a script builds.
+The ground truth is one table, built by a script, that lists every number the paper prints and compares each with the value the original code produces and the value the maintained rewrite produces. Every erratum about a number traces back to a row in it, and every claim that the rewrite reproduces the paper rests on it.
 
-The ground truth is the backbone of the whole procedure. Every erratum about a number traces to a row in it, and every claim that the rewrite reproduces the paper rests on it. Two principles govern it.
+We settled on two principles for it, both learned the hard way.
 
-**Start from the article, not the code.** Enumerate what the paper prints, then join it to what the pipeline computes. If you start from the pipeline's output, any number the pipeline never computes is invisible, and those are exactly the numbers most likely to be wrong.
+**Start from the article.** We list what the paper prints first, and only then join that list to what the pipeline computes. Our earliest attempts went the other way, starting from the code's output, and they were blind to any number the code never computed. Those turned out to be some of the most error-prone numbers of all: values typed into the text by hand, or left over from an earlier draft.
 
-**Generate it; never type it.** The only values in the ground truth typed by a person are the printed values, transcribed from the published page. The archive's values come from running the deposited code; the rewrite's values are read from the rewrite's output; the verdicts are computed. A ground truth with typed comparison values agrees with itself by construction and can detect nothing.
+**Generate it rather than type it.** The only values in the table that a person types are the printed ones, transcribed from the published page. The archive's values come from running the deposited code, the rewrite's values are read from its output files, and the verdicts are computed. In one early repository, the comparison values had been typed in by hand too, and every row "matched", which meant the table couldn't have detected a problem if there had been one.
 
-## 2.1 The table
+## The table
 
-`ground_truth/<paper_id>_ground_truth.csv`, built by `ground_truth/build_ground_truth.R`, which the entry point runs last:
+`ground_truth/<paper_id>_ground_truth.csv` is written by `ground_truth/build_ground_truth.R`, which `run_all.R` runs last:
 
 `paper_id, claim_id, location, claim_type, claim, value_paper, digits, value_script, match, value_rewrite, match_rewrite, holds, defect_locus, disposition, disposition_reason, notes`
 
 - `location` says where the number is printed: a table or figure, a page and paragraph, a footnote, or an appendix section.
-- `value_paper` is the number **as printed**, stored as text. Never let it pass through a numeric type: `0.80` read as a number becomes `0.8`, and `-0.00` becomes `0`, and the printed precision, which is part of the claim, is gone. Force every reader of this column to read it as a string.
-- `digits` is the precision the page prints, carried per row, never inferred from the value alone.
-- `value_script` comes from running the deposited code (Stage 1), and is empty where the archive could not be run. Columns are never dropped because they are empty.
+- `value_paper` is the number exactly as printed, stored as text. Reading it as a number throws information away: `0.80` becomes `0.8`, `-0.00` becomes `0`, and the printed precision, which is part of what the paper claims, is lost. We had this happen in several repositories before we started forcing the column to be read as text everywhere.
+- `digits` is the precision the page prints, recorded for each row.
+- `value_script` comes from running the deposited code in Stage 1, and is left empty where the archive couldn't be run.
 - `value_rewrite` is read from the rewrite's output at full precision.
-- `match`, `match_rewrite`, and `holds` are written `TRUE`, `FALSE`, or empty, never `1` and `0`.
+- `match`, `match_rewrite`, and `holds` take the values `TRUE`, `FALSE`, or empty.
 
-The full column definitions and vocabularies are in [`schemas/ground_truth.md`](../schemas/ground_truth.md).
+The full definitions are in [`schemas/ground_truth.md`](../schemas/ground_truth.md).
 
-## 2.2 When two numbers match
+## When two numbers match
 
-A computed value matches a printed one when, rounded to the page's printed precision, it gives the same digits. Before comparing, normalize both sides in the same way: a missing leading zero, a typographic minus sign, thousands separators, and a signed zero. Use a small numerical tolerance (`1e-9`) only to absorb floating-point representation, never to forgive a rounding difference.
+A computed value matches a printed one when, rounded to the precision the page prints, it gives the same digits. Before comparing, both sides get the same clean-up: a missing leading zero restored, a typographic minus sign replaced, thousands separators removed, and a negative zero treated as zero. A tiny tolerance (`1e-9`) absorbs floating-point representation, and nothing else.
 
-Three refinements:
+Three refinements came up often enough to write down:
 
-- **Hedged numbers.** A number the page itself hedges ("about 40 percent", "roughly", "nearly", "on the order of") is compared within half a step of the sentence's own precision. An *unhedged* approximation is held to the printed digits: if the text says 40 percent and the value is 38, that is an error, not an approximation.
-- **Differences of printed values.** A difference the text computes from two printed cells is allowed one unit in the last digit, since each cell was rounded on its own.
-- **Comparing the archive.** The archive's value is compared at the coarser of the page's precision and the precision the deposited code itself prints.
+- **Hedged numbers.** When the text itself hedges ("about 40 percent", "roughly", "nearly", "on the order of"), we compared within half a step of the sentence's own precision. When the text states an approximate number without a hedge, we held it to its printed digits: a sentence that says 40 percent about a value of 38 percent is an error.
+- **Differences of printed values.** When the text reports a difference between two printed cells, we allowed one unit in the last digit, since each cell was rounded separately.
+- **The archive's precision.** We compared the archive's value at the coarser of the page's precision and the precision at which the deposited code itself prints.
 
-The full rule, with examples, is in [`rules/rounding.md`](../rules/rounding.md).
+More detail and examples are in [`rules/rounding.md`](../rules/rounding.md).
 
-## 2.3 Numbers that come from random draws
+## Numbers that come from random draws
 
-Bootstrap intervals, randomization-inference p-values, simulation-based power, and anything else drawn at random can differ from run to run, and between software versions even with the same seed. First confirm that the procedure really draws at random; an unexpected difference is often a deterministic bug that someone attributed to noise. Then, for a value the paper reports without a fixed seed, compare it with the distribution of the value over many seeds rather than with a single draw. Leave `match_rewrite` empty and record whether the printed value is consistent with that distribution in `holds`. A printed value far outside the range of reasonable draws is an error; one inside it is not. See [`rules/stochastic.md`](../rules/stochastic.md).
+Bootstrap intervals, randomization-inference p-values, simulated power, and anything else based on random draws can differ from run to run, and between software versions even with the same seed. Before putting a difference down to randomness, we checked that the procedure actually draws at random; more than once, a difference that looked like noise was a deterministic bug. For a value the paper reports without a seed, we compared it with the distribution of that value over many seeds, left `match_rewrite` empty, and recorded in `holds` whether the printed value was consistent with that distribution. A printed value far outside any reasonable draw counts as an error; one inside the range doesn't. See [`rules/stochastic.md`](../rules/stochastic.md).
 
-## 2.4 Where the defect is: `defect_locus`
+## Where the problem is: `defect_locus`
 
-Every row where a comparison fails (`match` or `match_rewrite` is `FALSE`, or `holds` is `FALSE`) must say where the problem lies:
+Each row where a comparison fails (`match`, `match_rewrite`, or `holds` is `FALSE`) records where the problem lies:
 
 | `defect_locus` | Meaning |
 |---|---|
-| `paper_internal` | The printed text is wrong: the code produces the right number and the page prints another (a typo, a stale number, a rounding slip, a transposed cell). |
-| `archive` | The deposited code is wrong: it produces a number that a corrected computation does not, and the page faithfully printed the wrong one. |
-| `environment` | The software changed: the deposited code, run today, produces a different number than it did then. |
-| `rewrite` | The maintained rewrite is wrong. Fix it; this locus should not survive to the end. |
-| `upstream` | The error is in something the paper relied on (a dataset, a published estimate it reused). |
-| `unresolved` | You looked, and cannot tell. |
+| `paper_internal` | The printed text is wrong: the code produces one number and the page prints another (a typo, a stale number, a rounding slip, a transposed cell). |
+| `archive` | The deposited code is wrong: it produces a number that a corrected computation doesn't, and the page printed what the code produced. |
+| `environment` | The software changed: the deposited code, run today, gives a different number than it did then. |
+| `rewrite` | The maintained rewrite is wrong. We fixed these, so none should remain at the end. |
+| `upstream` | The problem is in something the paper relied on, such as a dataset or an estimate it reused. |
+| `unresolved` | We looked, and couldn't tell. |
 
-The rule is strict in both directions: a failing row **must** carry a locus, and a row where everything matches **must not**. A row with no verdict (an unseeded value, say) may. One special case is easy to get wrong. When the page, the archive, and the rewrite all agree but the agreed number is wrong because the deposited code has a bug, every comparison "matches", yet the paper is in error. That row carries `archive` as its locus, and only if an erratum names it.
+The rule cuts both ways: a failing row gets a locus, and a row where everything matches doesn't. A row with no verdict, such as an unseeded value, may or may not.
 
-Name the locus where each row is built, never as a default for the table. A second contributing cause goes in `notes`.
+One case is easy to miss. Sometimes the page, the archive, and the rewrite all agree, yet the number is wrong, because the deposited code has a bug and the rewrite faithfully reproduced it before the bug was found. Every comparison "matches", and the paper is still in error. We record those rows with the locus `archive`, and only when an erratum names them.
 
-## 2.5 What happened to it: `disposition`
+We set the locus where each row is built, rather than as a default for the whole table, and put any second contributing cause in `notes`.
 
-Every row with a defect also records what was done about it:
+## What was done about it: `disposition`
+
+Each row with a defect also records what happened to it:
 
 | `disposition` | Meaning |
 |---|---|
-| `corrected_here` | An entry in this repository's errata corrects it. Computed from the errata, never typed. |
+| `corrected_here` | An entry in this repository's errata corrects it. This one is computed from the errata, never entered by hand. |
 | `corrected_by_journal` | A published corrigendum or erratum corrects it. |
-| `documented_only` | Recorded here, deliberately not corrected (for example, a value inside simulation noise). |
-| `not_corrected` | Known, and left uncorrected, for a stated reason. |
+| `documented_only` | Recorded here and deliberately not corrected (a value within simulation noise, for example). |
+| `not_corrected` | Known, and left uncorrected for a stated reason. |
 | empty | Nobody has decided yet. |
 
-The three judgment values carry a `disposition_reason`. The builder stops if any `paper_internal` row has no disposition: an error in the printed text that nobody has decided about is an unfinished job.
+The three judgment values come with a `disposition_reason`. The build stops if any `paper_internal` row has no disposition, since an error in the printed text that nobody has decided about is unfinished business.
 
-These dispositions map onto the decision every author faces about each error: fix it in your own errata, send it to the journal, or record it and move on. See [`rules/severity.md`](../rules/severity.md).
+The dispositions line up with the choice an author faces for each error: fix it in your own errata, send it to the journal, or record it and move on. [`rules/severity.md`](../rules/severity.md) describes how we made that choice.
 
-## 2.6 Coverage: did you look at everything?
+## Coverage
 
-"Every table has at least one row" is not coverage. Coverage is reported per table and figure, as a fraction:
+Our first coverage check asked only whether every table had at least one row in the ground truth, and it passed while missing most of the numbers on some tables. We now report coverage table by table and figure by figure, as a fraction, in `ground_truth/float_coverage.csv`:
 
-`ground_truth/float_coverage.csv`: `float, published_numbers, covered, reproduced_by_rewrite, reproduced_by_archive, plotted, plotted_reproduced, note`
+`float, published_numbers, covered, reproduced_by_rewrite, reproduced_by_archive, plotted, plotted_reproduced, note`
 
-- List the published tables and figures from the article itself, not from the code, and check the list in both directions: every float the article contains has a row, and every row names a float the article contains.
-- `published_numbers` counts the numbers printed on each table or figure; `covered` counts how many have a ground-truth row.
-- For a figure with no printed numbers, the claim is what it plots: count the plotted quantities and how many the rewrite reproduces. A figure is never exempt merely because it "prints no numbers".
-- Report the covered fraction in the README.
+- The list of tables and figures comes from the article itself, and we checked it in both directions: every table and figure in the article has a row, and every row names one that the article contains.
+- `published_numbers` counts the numbers printed on each table or figure, and `covered` counts how many of them have a row in the ground truth.
+- For a figure that prints no numbers, what it plots is the claim, so we counted the plotted quantities and how many the rewrite reproduces. A figure never got a pass just for having no printed numbers.
+- The README reports each covered fraction.
 
-Join the article's list to the pipeline's output in both directions, and check that every join matches one row to one row. A join that silently matches nothing produces an empty value that reads like "could not be checked", and a many-to-many join duplicates rows. Never select a row by its published value: that guarantees a match.
+Two things caught us out when joining the article's list to the pipeline's output. A join that silently matches nothing produces empty values that look like "couldn't check" rather than "missing", and a join that matches one row to several quietly duplicates rows. We checked every join in both directions and confirmed that each matched one row to one row. We also stopped selecting rows by their published value, which guarantees a match.
 
-Read multi-column tables from the rendered page, not from text extracted from the PDF. Text extraction scrambles columns, and a misread cell manufactures an erratum.
+Finally, we read multi-column tables from the rendered page rather than from text extracted from the PDF. Text extraction can scramble columns, and a misread cell produces an erratum that isn't real.
 
-## Gate
+## Done when
 
-The builder runs as the last step of the entry point and stops if: any printed value has been read as a number; any failing row lacks a `defect_locus`, or any clean row has one; any `paper_internal` row lacks a disposition; any join is not one-to-one; or any published table or figure is missing from `float_coverage.csv`.
+The build script runs as the last step of `run_all.R`, and it stops if any printed value has been read as a number, if any failing row lacks a `defect_locus` or any matching row has one, if any `paper_internal` row lacks a disposition, if any join is not one-to-one, or if any published table or figure is missing from `float_coverage.csv`.
