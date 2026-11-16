@@ -5,6 +5,7 @@ project:
     - "*.qmd"
     - "*.md"
     - "!/README.md"
+  post-render: _llms.py
 
 website:
   title: "Active maintenance: a guide"

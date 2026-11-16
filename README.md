@@ -2,6 +2,12 @@
 
 In 2021, Limor Peer, Lilla Orr, and I proposed that researchers "actively maintain" their replication archives, updating the code as the software around it changes, so that published results stay reproducible for years rather than months (Peer, Orr, and Coppock 2021, *PS: Political Science & Politics*). For a long time, none of us did it, because it was a lot of work. With AI coding agents the work became cheap enough that I went back and did it for my published books and articles. This repository records how we did it, in enough detail that you could do the same for your own papers.
 
+To have a coding agent follow the guide, paste this into it, with the bracketed parts filled in:
+
+```text
+Read https://active-maintenance-aec.github.io/guide/llms-full.txt, which is the whole guide in one file. Then follow its session-start instructions (agent/session_start.md) to help me actively maintain the replication archive for [citation], whose deposit is at [deposit DOI], in the repository at [path].
+```
+
 The guide is written for people. Each stage also has a companion file in `agent/` that says the same thing as instructions a coding agent can follow. If the two ever disagree, the version written for people is the one we meant.
 
 ## What a finished repository does
