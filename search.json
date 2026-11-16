@@ -1,0 +1,1916 @@
+[
+  {
+    "objectID": "traps.html",
+    "href": "traps.html",
+    "title": "Traps",
+    "section": "",
+    "text": "The failures we hit more than once, or hit once at real cost, with what we did about them. Most are silent: the code runs, the checks pass, and the answer is wrong. They are grouped by the stage where they bite. The examples are R, because our code was R; the shapes carry over to any language (see languages.md).",
+    "crumbs": [
+      "All maintained papers",
+      "Traps"
+    ]
+  },
+  {
+    "objectID": "traps.html#fetching-and-running-the-archive",
+    "href": "traps.html#fetching-and-running-the-archive",
+    "title": "Traps",
+    "section": "Fetching and running the archive",
+    "text": "Fetching and running the archive\n\nRunning the archive in place. A deposited script that saves a figure to a bare relative path overwrote a file the deposit ships, so the working copy no longer matched the archive, and the checksum check passed only because it had run first. Run every deposited script in a scratch copy, never in the downloaded folder.\nWrite calls split across lines. A search for code that writes files misses a write.csv( whose file argument is on the next line. Join continued lines before searching.\nShipped intermediates. A script ran cleanly against the deposit as downloaded while the script that should have produced its input had failed; it was reading the deposited copy. One deposit went from “four of six scripts run” to “five of six fail” once its intermediates were removed. Run a second pass on a copy stripped to raw data and code (schemas/archive_run_status.md).\nThe archive that runs and writes nothing. One deposit had every write commented out, so it ran without error and left nothing to compare. A clean exit is not evidence of anything; check what the run produced.\nPrinting nothing. In R, source() prints nothing unless told to (print.eval = TRUE), so a harness that sources the deposited scripts records exit statuses correctly while capturing an empty log. We concluded that no archive values were recoverable from one paper until we turned printing on and recovered over a hundred. A deposit that builds a table object and comments out the print call can still be made to print it.\nA single container file. When the deposit is one zip or RAR, the “no unlisted files” check runs on a folder holding one file and checks nothing. Unpack into a folder of its own and check the members against a second manifest.\nA reason for skipping work that was never tested. We skipped one analysis because its package was “unmaintained”; it had been updated the day before, and installing it surfaced the paper’s only real reproducibility failure. Three other packages we had recorded as removed turned out to install and run. Test the reason before accepting it.",
+    "crumbs": [
+      "All maintained papers",
+      "Traps"
+    ]
+  },
+  {
+    "objectID": "traps.html#software-that-changed-underneath-the-code",
+    "href": "traps.html#software-that-changed-underneath-the-code",
+    "title": "Traps",
+    "section": "Software that changed underneath the code",
+    "text": "Software that changed underneath the code\n\nDispatch drift. A test function from one package, given a model fit from another, used to fall through to a classical test. A later version of the second package added the method it was looking for, and the identical line began returning a robust test: 17 of 18 cells in one table moved, with no error or warning. Nothing but comparison with the printed numbers catches this. Expect it wherever deposited code combines two packages.\nA package that changes another package on load. Loading one package replaced fourteen functions in base R and stats, and broke an unrelated package’s estimator for the rest of the session. To find such a package, record every function in the loaded namespaces, attach the deposit’s packages one at a time, and see which attach changes something. Bisecting by the failure finds only the first culprit.\nThe random-number sampler. R 3.6.0 changed how sample() draws. Seeded code from before April 2019 needs RNGkind(sample.kind = \"Rounding\") to reproduce itself (rules/stochastic.md), and the setting has to be restored explicitly afterwards, since on.exit() does not reliably restore it when scripts are sourced in sequence.\nSort order. dplyr 1.1 sorts character keys in the C locale by default, which puts every capitalised word ahead of every lowercase one. Every value stayed correct and the rows moved, and a cell-by-cell comparison against the published table reported 172 of 717 cells wrong when none were. Pass the locale explicitly, or compare by key rather than by position.\nWeights that quietly disappear. Refitting a weighted model from its own model.frame() drops the weights, which pairs weighted coefficients with unweighted standard errors; it moved one coefficient’s sign. Pass the weights explicitly.",
+    "crumbs": [
+      "All maintained papers",
+      "Traps"
+    ]
+  },
+  {
+    "objectID": "traps.html#writing-the-rewrite",
+    "href": "traps.html#writing-the-rewrite",
+    "title": "Traps",
+    "section": "Writing the rewrite",
+    "text": "Writing the rewrite\n\nA modern equivalent that is not equivalent. Replacing base R’s expand.grid() with tidyr’s expand_grid() transposed a grid, because the two vary their arguments in opposite orders. Every number still matched; only the figure was wrong, and it stayed wrong for months until someone laid the rendered figure beside the published one. Compare every figure by eye, as well as its numbers.\nFactor order in a deposited data file. A treatment variable stored as a factor whose first level was a treatment arm, not the control, reversed the sign of every contrast taken without releveling. The standard errors looked normal, the script ran cleanly and deterministically, and only the comparison with the published numbers caught it. Set the reference level explicitly.\nA column name that shadows an argument. A helper written mutate(outcome = outcome) on a table that already had an outcome column assigned the column to itself, so the labels were wrong while every cell was right, and a later filter silently dropped a whole experiment. Name arguments so they cannot collide with columns.\nA script that skips its own work. An if (file.exists(out)) guard returns the committed output instead of recomputing it, so the run passes while the code may be broken (Stage 3).\nAn output file that exists is not a render that worked. A loop that checked for README.md passed on stale files after a column rename had broken three reports. Check the exit status.\nUnseeded draws. A pipeline with an unseeded random draw gives a different answer on the second run, and nothing downstream means anything until it is fixed. Run everything twice and diff the outputs.",
+    "crumbs": [
+      "All maintained papers",
+      "Traps"
+    ]
+  },
+  {
+    "objectID": "traps.html#building-the-ground-truth",
+    "href": "traps.html#building-the-ground-truth",
+    "title": "Traps",
+    "section": "Building the ground truth",
+    "text": "Building the ground truth\n\nThe printed value read as a number. A CSV reader that guesses types turns “0.80” into 0.8 and “-0.00” into 0, and the precision needed for the comparison is gone. Force the column to text, and check that the file on disk still stores the string (rules/rounding.md).\nHand-typed comparison values. A typed number that agrees with a note looks exactly like a computed number that agrees with the data. One repository had a typed coverage count of 11 a few lines below code that would have said 3. Generate everything except the printed values.\nSelecting a row by the number you expect. Filtering pipeline output for the value the page prints guarantees a match. Select by key.\nJoins that match nothing. A join on a column that was missing for two of the studies left 72 of 130 rows unmatched, and the table read as if nothing were wrong. Route every join through one helper that checks keys are unique on both sides and the result is one-to-one.\nBuilding from the pipeline instead of the article. A ground truth built from what the rewrite produces cannot see what the rewrite does not produce. One paper’s first ground truth had 40 rows, all matching, covering little more than a third of the paper. Start from the printed page.\n“At least one row per float.” A figure with one checked value out of more than a hundred printed passed that test for months. Report coverage as a fraction for each float (schemas/float_coverage.md).\nRounding a value before comparing it. A value stored as 0.0115 rounds to 0.011, while the full-precision 0.01150090 rounds to the printed 0.012. Compare from full precision.",
+    "crumbs": [
+      "All maintained papers",
+      "Traps"
+    ]
+  },
+  {
+    "objectID": "traps.html#reading-the-published-article",
+    "href": "traps.html#reading-the-published-article",
+    "title": "Traps",
+    "section": "Reading the published article",
+    "text": "Reading the published article\n\nPDF text extraction. Text pulled from a PDF changes characters silently. In one paper = came out as 5 and the minus sign as 2, so a printed −1.5 arrived as 21.5. Multi-column regression tables were mis-aligned by a column, which produced a phantom erratum that survived two reviews. Check every quoted sentence and every transcribed cell against an image of the page, and read numbers printed on a figure by position rather than in reading order.\nNumbers written as words. A sweep for digits misses “five successive elections” and “in all but one study”. Run a second pass for number words.\nThe preprint. A preprint’s numbers are not the published numbers. Transcribe from the published version.\nTesting a document against the wrong materials. A corrigendum restated one paper’s original confidence intervals differently from the article’s appendix. We first wrote that up as an error in the corrigendum. It was not: the corrigendum had redrawn the original analysis from its own working files, whose inputs differed, and on those inputs it was right. Check a printed number under the conditions of the document that printed it.",
+    "crumbs": [
+      "All maintained papers",
+      "Traps"
+    ]
+  },
+  {
+    "objectID": "stages/05_errata.html",
+    "href": "stages/05_errata.html",
+    "title": "Stage 5: Errata",
+    "section": "",
+    "text": "Every error the earlier stages turn up is written up in one itemized errata note per paper, rendered to a PDF that sits at the top of the repository and, in our case, also on my website. The corrected values in it are computed by the code at the time the note is rendered, so if a package update ever moves a number, the errata move with it.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 5: Errata"
+    ]
+  },
+  {
+    "objectID": "stages/05_errata.html#what-counts-as-an-erratum",
+    "href": "stages/05_errata.html#what-counts-as-an-erratum",
+    "title": "Stage 5: Errata",
+    "section": "What counts as an erratum",
+    "text": "What counts as an erratum\nWe counted any statement printed in the article, its appendix, or its references that is wrong, however small. That includes:\n\na wrong number, or a number left over from an earlier draft;\na value rounded the wrong way at the printed precision (the text printed 0.23 for a value of 0.2230);\na description of a method, sample, or variable that doesn’t match what was done;\na label, a legend, or a panel order that is wrong;\na cross-reference to the wrong table;\nspelling and typesetting mistakes;\nreference-list errors, which were common (much of my early bibliography came from search-engine citations that were themselves wrong).\n\nWe left out three things. A value that differs from our computation only within the estimator’s own noise is not an error (see rules/stochastic.md). A finding we couldn’t judge either way is recorded as unresolved in the ground truth rather than corrected. An analysis choice we would now make differently is not an error at all (see rules/erratum.md).\nWhen the prose disagreed with the paper’s own table and our computation supported the table, we corrected the sentence to match the table.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 5: Errata"
+    ]
+  },
+  {
+    "objectID": "stages/05_errata.html#the-note",
+    "href": "stages/05_errata.html#the-note",
+    "title": "Stage 5: Errata",
+    "section": "The note",
+    "text": "The note\nerrata.qmd renders &lt;paper_id&gt;_errata.pdf and writes errata_entries.csv, one row per entry:\nentry, class, source, form, title, location, published, corrected, note, claim_ids, corrected_values, values_in_spans\n\nclass says what kind of error it is: quantity, description, interpretation, definition, label, float, cross_reference, wording, spelling, typography, or bibliographic.\nsource says how we found it: pipeline (the rewrite computed a different value), reading (reading the article against itself, its appendix, and its code), reference_audit (checking every reference against Crossref), publisher_record (an earlier published correction), authors_archive (our own files outside the deposit), or proof (the proofs or accepted manuscript).\nform is full (the published and corrected passages, quoted in full), brief (a one-line correction), or note (an explanation with no replacement text).\npublished and corrected quote the passage before and after, with the changed values marked; claim_ids ties each entry to rows in the ground truth and the claims file.\n\nEach entry’s corrected values are computed from the rewrite’s output when the note renders. The build checks that every claim an entry names exists, that only quantity entries carry corrected values, that every corrected value appears in the corrected text, and that no entry “corrects” a claim the pipeline reproduces. One rule caught several mistakes of ours: a corrected value must never render identically to the published one at the printed precision, because then there is nothing to correct.\nEntries are numbered by severity, with the errors that matter most first, and once a note is public its numbering only grows: new entries are added at the end, so that anyone citing “entry 3” keeps pointing at the same thing.\nEvery quotation in the note was checked against an image of the published page. Text extracted from a PDF can drop characters, merge columns, or mangle symbols, and an erratum that misquotes the article is itself an error.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 5: Errata"
+    ]
+  },
+  {
+    "objectID": "stages/05_errata.html#whether-a-conclusion-changes",
+    "href": "stages/05_errata.html#whether-a-conclusion-changes",
+    "title": "Stage 5: Errata",
+    "section": "Whether a conclusion changes",
+    "text": "Whether a conclusion changes\nThe pipeline can tell you that a number is wrong. Whether that changes a conclusion of the paper is a judgment, and we left it to the authors. When an entry did change a conclusion, the note says so plainly at the top.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 5: Errata"
+    ]
+  },
+  {
+    "objectID": "stages/05_errata.html#which-errors-go-to-the-journal",
+    "href": "stages/05_errata.html#which-errors-go-to-the-journal",
+    "title": "Stage 5: Errata",
+    "section": "Which errors go to the journal",
+    "text": "Which errors go to the journal\nMost of the errors we found were embarrassing but trivial, and the scientific contribution of each paper stands without them. Sending dozens of journals a correction for every typo and rounding slip would bury the editors and devalue corrections as a signal. We used three tiers:\n\nEvery error goes in the errata note, beside the maintained code, where anyone reading the repository will find it.\nAn error that changes the direction or implications of a finding a reader would rely on also goes to the journal as a corrigendum, whether or not the finding appears in the abstract. In our experience, errors that meet this bar are rare.\nRetraction is for findings that can no longer be relied on at all.\n\nWhen a corrigendum was warranted, we used it to correct the related errors in the same article as well. The reasoning behind the tiers is in rules/severity.md, and the disposition column in the ground truth records which tier each error landed in.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 5: Errata"
+    ]
+  },
+  {
+    "objectID": "stages/05_errata.html#done-when",
+    "href": "stages/05_errata.html#done-when",
+    "title": "Stage 5: Errata",
+    "section": "Done when",
+    "text": "Done when\nerrata.qmd renders without error, every corrected value is computed rather than typed, every quotation has been checked against the published page, the build’s checks pass, and every paper_internal row in the ground truth has a disposition.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 5: Errata"
+    ]
+  },
+  {
+    "objectID": "stages/03_rewrite.html",
+    "href": "stages/03_rewrite.html",
+    "title": "Stage 3: Maintained rewrite",
+    "section": "",
+    "text": "The rewrite is new code that reproduces every table, figure, and number in the paper from the deposited data, on current software, written the way STYLE.md describes. It is the part of the project that keeps the paper usable: when a package changes next year, this is the code that gets updated.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 3: Maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "stages/03_rewrite.html#shape",
+    "href": "stages/03_rewrite.html#shape",
+    "title": "Stage 3: Maintained rewrite",
+    "section": "Shape",
+    "text": "Shape\nWe wrote one script per table or figure, named for what it produces, with cleaning kept separate from analysis and shared functions in a single maintained/helpers.R. Every script writes to maintained/output/. Next to each figure we also save a CSV of every quantity it plots, because a figure file can’t be compared with anything, while a CSV of its points can. Tables are written both formatted and unrounded, so that later stages compare full-precision values rather than what a table package chose to print.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 3: Maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "stages/03_rewrite.html#three-rules-we-held-to",
+    "href": "stages/03_rewrite.html#three-rules-we-held-to",
+    "title": "Stage 3: Maintained rewrite",
+    "section": "Three rules we held to",
+    "text": "Three rules we held to\nNo published number goes in. The rewrite computes everything from the deposited data. When a script seemed to need a number from the paper (a threshold, a sample size, a cut point), that was nearly always a sign that the computation upstream of it was missing. The one exception is a number that is itself a claim about the data, such as “fewer than 5 percent of respondents failed the attention check”, which a dedicated script checks rather than uses.\nNo script skips its own work. A script that checks whether its output already exists and returns early can pass every test while being broken. Ours always recompute.\nEvery “can’t be computed” is a claim to test. Several times a comment in the archive, or in an early draft of our own rewrite, said that some number couldn’t be reproduced from the deposit, and it turned out it could. We treated such comments as hypotheses, and checked them.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 3: Maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "stages/03_rewrite.html#errors-versus-choices",
+    "href": "stages/03_rewrite.html#errors-versus-choices",
+    "title": "Stage 3: Maintained rewrite",
+    "section": "Errors versus choices",
+    "text": "Errors versus choices\nThe rewrite corrects unambiguous coding errors: a typo in a variable name, a wrong index, the wrong column, a covariate left out of a specification the paper describes. It does not revisit analysis decisions. If the paper used a particular estimator, specification, sample, or set of standard errors, the rewrite uses the same one, even where we would now choose differently. A choice we’d make differently today isn’t an error, and treating it as one would turn the errata into a second paper.\nThe line isn’t always sharp. One case that came up repeatedly: a regression silently dropped collinear covariates, so the model actually estimated differed from the one the paper describes. We counted that as an error, because the paper’s own description says what was intended. When we couldn’t tell which of two deposited values the authors meant, we wrote the finding up as a note for the authors to decide, rather than picking one.\nEach correction the rewrite makes shows up in the ground truth as a row where the rewrite disagrees with the archive (match_rewrite = FALSE, locus archive), and in the errata in Stage 5. We were careful not to carry a typo forward into the new code just because the old code had it; the point is that the rewrite is right.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 3: Maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "stages/03_rewrite.html#software-changes",
+    "href": "stages/03_rewrite.html#software-changes",
+    "title": "Stage 3: Maintained rewrite",
+    "section": "Software changes",
+    "text": "Software changes\nThe rewrite uses current packages and the current random-number generator. When either moves a published number, the ground truth records it with the locus environment. A few of these surprised us. A function can keep its name and arguments while changing what it computes: one test function, given a regression fit from a newer package, quietly began using a different variance estimator, with no warning. Converting an old grid-building function to its modern equivalent transposed a grid, which showed up only when we laid the new figure beside the published one. We now compare every rendered figure with the published version by eye, in addition to comparing the numbers.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 3: Maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "stages/03_rewrite.html#the-same-answer-twice",
+    "href": "stages/03_rewrite.html#the-same-answer-twice",
+    "title": "Stage 3: Maintained rewrite",
+    "section": "The same answer twice",
+    "text": "The same answer twice\nWe ran run_all.R twice from fresh sessions, checked that both runs exited cleanly, and confirmed that the second run left the output folder byte-for-byte unchanged. PDFs embed a creation timestamp, so we blank it when writing figures; otherwise every run “changes” every figure. A pipeline that gives a different answer on the second run has an unseeded random draw or depends on something outside the repository, and both need fixing before the comparisons mean anything.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 3: Maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "stages/03_rewrite.html#done-when",
+    "href": "stages/03_rewrite.html#done-when",
+    "title": "Stage 3: Maintained rewrite",
+    "section": "Done when",
+    "text": "Done when\nrun_all.R runs from a clean session, every table and figure in the paper has a script that produces it, no published value is an input, and two runs in a row leave maintained/output/ unchanged.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 3: Maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "stages/01_archive_check.html",
+    "href": "stages/01_archive_check.html",
+    "title": "Stage 1: Archive check",
+    "section": "",
+    "text": "In this stage we pinned down exactly what each deposit contains and found out whether its code still runs, before starting the rewrite.\nIt helped to keep two questions apart. Does the archive run? is answered here, by executing it. Does the archive reproduce the paper? is answered in Stage 2, by comparing what it produces with what the paper prints. The two come apart more often than you might expect: some of our archives ran cleanly and reproduced little, and others failed on the first line yet reproduced everything once that line was fixed.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 1: Archive check"
+    ]
+  },
+  {
+    "objectID": "stages/01_archive_check.html#the-manifest-and-the-download-script",
+    "href": "stages/01_archive_check.html#the-manifest-and-the-download-script",
+    "title": "Stage 1: Archive check",
+    "section": "The manifest and the download script",
+    "text": "The manifest and the download script\nFor each deposit we wrote original_manifest.csv, one row per file, from the archive’s own API rather than by hand. For Dataverse:\nfile, directory_label, dataverse_file_id, file_persistent_id, bytes, md5_served, md5_published, unf, served_as\nFor OSF:\nfile, directory_label, osf_file_id, bytes, md5_served, md5_published, sha256_published\nmd5_served is the checksum of the bytes the archive actually sends, and md5_published is the checksum in the archive’s metadata. They usually agree. They don’t when Dataverse has converted a tabular upload to its own format and serves the converted version by default; in that case we recorded both and asked for the original format.\nThen download_original.R:\n\ndownloads every file in the manifest into original/, which git ignores;\nstops if any file’s size or served checksum differs from the manifest;\nprints, without stopping, any disagreement with the published checksum;\nstops if original/ contains a file the manifest doesn’t list, hidden files included;\nunpacks any zip or RAR file into its own regenerated folder and checks the contents against a second manifest.\n\nrun_all.R runs this script first. It’s the one check in the whole pipeline that comes with a deadline. If a deposit ever stops verifying, the archive has changed the files, released a new version, or withdrawn the deposit, and the sooner you find out which, the better. At that point the manifest may be the only public record of what the deposit held.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 1: Archive check"
+    ]
+  },
+  {
+    "objectID": "stages/01_archive_check.html#running-the-archive-as-shipped",
+    "href": "stages/01_archive_check.html#running-the-archive-as-shipped",
+    "title": "Stage 1: Archive check",
+    "section": "Running the archive as shipped",
+    "text": "Running the archive as shipped\nWe ran each deposited script in a scratch copy of the deposit (never in the downloaded folder itself) and recorded what happened in ground_truth/archive_run_status.csv:\npass, script, role, exit_status, outcome, stopped_at\n\npass is as_shipped (the deposit exactly as downloaded) or stripped (only the raw data and the code, with any intermediate files the deposit included removed). We ran both, because a deposit that includes its own intermediate files can make a script look fine when the script that should have produced those files is broken.\nrole is cleaning, analysis, or other. A helper file that is only ever sourced by other scripts gets no row, since it never runs on its own.\noutcome is clean, error, timeout, or not_run. Scripts we couldn’t run at all (several needed Stata, which we didn’t have) still got rows, with not_run and the reason in stopped_at.\n\nWhere it mattered, we ran under the conditions of the paper’s day. R changed its default random-number sampler in version 3.6.0 (April 2019), so for older code we set RNGkind(sample.kind = \"Rounding\") when checking whether the archive reproduced its own published draws. The rewrite uses the current default, and any number that moves because of it is recorded as an environment difference (see Stage 2).",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 1: Archive check"
+    ]
+  },
+  {
+    "objectID": "stages/01_archive_check.html#what-the-run-writes",
+    "href": "stages/01_archive_check.html#what-the-run-writes",
+    "title": "Stage 1: Archive check",
+    "section": "What the run writes",
+    "text": "What the run writes\nBefore running, we searched the deposited code for anything that writes a file, joining lines first, since a write call split across two lines is easy to miss. After running, we compared every file’s modification time and checksum with the manifest and recorded what had changed in ground_truth/archive_overwrites.csv:\npass, file, effect, matches_deposit\neffect is added, overwritten, rebuilt, withheld (an intermediate removed for the stripped pass that nothing rebuilt), or deleted, and matches_deposit says whether a file the run rewrote came out identical to the deposited one. When a run overwrote a deposited output with something different, that told us something: either the deposited output came from different code than what was deposited, or the software had moved. Running in a scratch copy is what made this table possible, and it also kept the runs from quietly altering the deposit we were trying to document.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 1: Archive check"
+    ]
+  },
+  {
+    "objectID": "stages/01_archive_check.html#diagnosing-failures",
+    "href": "stages/01_archive_check.html#diagnosing-failures",
+    "title": "Stage 1: Archive check",
+    "section": "Diagnosing failures",
+    "text": "Diagnosing failures\nWhen a script failed, we recorded why, and left the deposit as it was: the deposit is the published record, and its failures are part of what we were documenting. The causes we saw most often, roughly in order: a function removed or renamed in a package update; a package that no longer installs; an absolute path from the author’s computer; a file the authors never deposited; and a script that depends on an intermediate file no deposited script creates. We learned to treat a “deprecated function” warning as a hypothesis about the cause; several times it turned out not to be the real problem.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 1: Archive check"
+    ]
+  },
+  {
+    "objectID": "stages/01_archive_check.html#done-when",
+    "href": "stages/01_archive_check.html#done-when",
+    "title": "Stage 1: Archive check",
+    "section": "Done when",
+    "text": "Done when\nThe manifest verifies, the download script stops on any mismatch, and every deposited script has a row in archive_run_status.csv for each pass.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 1: Archive check"
+    ]
+  },
+  {
+    "objectID": "schemas/published_claims.html",
+    "href": "schemas/published_claims.html",
+    "title": "ground_truth/published_claims.csv",
+    "section": "",
+    "text": "The extraction: one row per claim the article and its appendix make, numeric or not (Stage 4). Unlike the other tables, much of this one is transcribed by a person: the printed values and the classifications are read off the page. It is reviewed by hand, committed, and read by both the ground truth build and in_text_claims.R.\nclaim_id, location, claim_type, claim, value_paper, digits, comparison, expect, needs_block, notes",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Claims extraction"
+    ]
+  },
+  {
+    "objectID": "schemas/published_claims.html#allowed-values",
+    "href": "schemas/published_claims.html#allowed-values",
+    "title": "ground_truth/published_claims.csv",
+    "section": "Allowed values",
+    "text": "Allowed values\nclaim_type\n\n\n\n\n\n\n\nValue\nMeaning\n\n\n\n\npipeline\nA number the analysis produces: an estimate, a standard error, a p-value, a sample size.\n\n\ndescriptive\nA claim about the results, often with no number: significance, direction, order, persistence.\n\n\ndefinitional\nA number that defines the design: the number of arms, a scale’s range, a wave’s date.\n\n\nstructural\nA number about the document itself: “three experiments”, the number of rows in a table.\n\n\ntranscribed\nA number quoted from another source, such as another study’s estimate.\n\n\n\ncomparison\n\n\n\nValue\nMeaning\n\n\n\n\n==\nThe printed value is the quantity, at the printed precision. The default for every row with a value_paper.\n\n\n&lt;, &lt;=, &gt;, &gt;=\nThe sentence states a bound (“less than 5 percent”).\n\n\napprox\nThe sentence hedges the number (“about”, “roughly”). The hedge’s tolerance is set in rules/rounding.md.\n\n\nNA\nThe row has no value_paper.\n\n\n\nexpect: NA (the usual case: the check compares values), range, derived, shape, or absent. The meanings are the verdicts of the same names in Stage 4. The column records what the claims script declares; the script, not this column, is what decides.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Claims extraction"
+    ]
+  },
+  {
+    "objectID": "schemas/published_claims.html#rules",
+    "href": "schemas/published_claims.html#rules",
+    "title": "ground_truth/published_claims.csv",
+    "section": "Rules",
+    "text": "Rules\n\nneeds_block is TRUE for every pipeline and descriptive claim, and for any definitional or structural claim the pipeline can actually reach. The claims script must print exactly the claims marked TRUE, no more and no fewer.\ndigits lives here and nowhere else. Both instruments read it from this file, so they cannot disagree about a claim’s precision. The build also checks that value_paper, formatted at digits, gives back the stored string, which catches a wrong precision that would otherwise pass on both sides.\nvalue_paper is read as text. A CSV reader left to guess will turn “0.020” into 0.02.\nclaim_type is the boundary of what gets checked, and nothing downstream audits it. We compared the descriptive and definitional rows within each section by hand, because the same construction, classified two ways two paragraphs apart, once left one of a pair of identical errors uncaught.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Claims extraction"
+    ]
+  },
+  {
+    "objectID": "schemas/ground_truth.html",
+    "href": "schemas/ground_truth.html",
+    "title": "ground_truth/<paper_id>_ground_truth.csv",
+    "section": "",
+    "text": "One row per printed value or claim checked against the code: every cell of every table, every plotted quantity we could count, and every pipeline and descriptive claim in the text (Stage 2). The table is built by ground_truth/build_ground_truth.R as the last step of run_all.R, and the only values typed into it are the printed ones.\npaper_id, claim_id, location, claim_type, claim, value_paper, digits, value_script, match, value_rewrite, match_rewrite, holds, defect_locus, disposition, disposition_reason, notes\nThe rules for comparing a computed value with a printed one are in rules/rounding.md, and for values from random draws in rules/stochastic.md.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Ground truth"
+    ]
+  },
+  {
+    "objectID": "schemas/ground_truth.html#allowed-values",
+    "href": "schemas/ground_truth.html#allowed-values",
+    "title": "ground_truth/<paper_id>_ground_truth.csv",
+    "section": "Allowed values",
+    "text": "Allowed values\nclaim_type: pipeline, descriptive, definitional, structural, transcribed, as in published_claims.md.\ndefect_locus\n\n\n\n\n\n\n\nValue\nMeaning\n\n\n\n\npaper_internal\nThe printed text is wrong: the code produces one number and the page prints another.\n\n\narchive\nThe deposited code is wrong, and the page printed what it produced.\n\n\nenvironment\nThe software changed: the deposited code, run today, gives a different number than it did then.\n\n\nrewrite\nThe rewrite is wrong. We fixed these, so none should remain.\n\n\nupstream\nThe problem is in something the paper relied on, such as a dataset or an estimate it reused.\n\n\nunresolved\nWe looked and could not tell.\n\n\nNA\nNo defect.\n\n\n\ndisposition\n\n\n\n\n\n\n\nValue\nMeaning\n\n\n\n\ncorrected_here\nAn entry in this repository’s errata corrects it. Computed from errata_entries.csv, never typed.\n\n\ncorrected_by_journal\nA published corrigendum or erratum corrects it.\n\n\ndocumented_only\nRecorded and deliberately not corrected: a value within simulation noise, or an archive bug the rewrite repairs that never reached the page.\n\n\nnot_corrected\nKnown, and left uncorrected for a stated reason.\n\n\nNA\nNobody has decided yet.\n\n\n\nHow the dispositions map onto the decision about which errors go to a journal is in rules/severity.md.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Ground truth"
+    ]
+  },
+  {
+    "objectID": "schemas/ground_truth.html#rules-the-build-enforces",
+    "href": "schemas/ground_truth.html#rules-the-build-enforces",
+    "title": "ground_truth/<paper_id>_ground_truth.csv",
+    "section": "Rules the build enforces",
+    "text": "Rules the build enforces\n\nThe locus rule. A row where match, match_rewrite, or holds is FALSE must have a defect_locus. A row where every comparison passes must not, with one exception: a bug the deposited code has, the page printed, and the rewrite at first reproduced, which an erratum names. Such a row carries archive despite matching everywhere. A row with no verdict at all may or may not carry a locus. The locus is set where each row is built, never as a default for the whole table.\nDisposition follows locus. Every row with a locus gets a disposition, or NA while undecided. The build stops on any paper_internal row whose disposition is NA; the other loci are reported as a count.\nThe printed values are the only typed values. value_script, value_rewrite, every verdict, and corrected_here come from code. A typed number that agrees with a note is indistinguishable from a computed number that agrees with the data, and only the second is evidence.\nBuilt from the article first. The rows come from what the paper prints, joined to what the pipeline produces, so that a printed value with no pipeline counterpart shows up as a row with an empty value_rewrite rather than not at all.\nJoins are checked in both directions. Every join asserts that its keys are unique on both sides and that the result is one-to-one, since a join that silently matches nothing looks the same as a table with nothing wrong.\nRows are never selected by their printed value. Filtering pipeline output for the number the page prints guarantees a match.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Ground truth"
+    ]
+  },
+  {
+    "objectID": "schemas/errata_entries.html",
+    "href": "schemas/errata_entries.html",
+    "title": "errata_entries.csv",
+    "section": "",
+    "text": "One row per entry in the errata note. errata.qmd writes this table when it renders the note, so the table and the PDF always say the same thing (Stage 5).\nentry, class, source, form, title, location, published, corrected, note, claim_ids, corrected_values, values_in_spans",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Errata"
+    ]
+  },
+  {
+    "objectID": "schemas/errata_entries.html#allowed-values",
+    "href": "schemas/errata_entries.html#allowed-values",
+    "title": "errata_entries.csv",
+    "section": "Allowed values",
+    "text": "Allowed values\nclass\n\n\n\n\n\n\n\nValue\nMeaning\n\n\n\n\nquantity\nA wrong number.\n\n\ndescription\nA method, sample, or variable described differently from what was done.\n\n\ninterpretation\nA conclusion that does not follow once the estimates are corrected.\n\n\ndefinition\nA wrong definition, display, or proof step.\n\n\nlabel\nA wrong axis label, legend, or panel title.\n\n\nfloat\nA float that is wrong as a whole, such as panels in the wrong order.\n\n\ncross_reference\nA pointer to the wrong table, figure, or section.\n\n\nwording\nA wrong word that changes no number or substance.\n\n\nspelling\nA misspelling, including of a name.\n\n\ntypography\nA typesetting error.\n\n\nbibliographic\nAn error in the reference list.\n\n\n\nsource\n\n\n\n\n\n\n\nValue\nMeaning\n\n\n\n\npipeline\nThe rewrite computed a different value.\n\n\nreading\nReading the article against itself, its appendix, and its code.\n\n\nreference_audit\nChecking every reference against Crossref.\n\n\npublisher_record\nAn earlier published correction.\n\n\nauthors_archive\nThe authors’ own files outside the deposit.\n\n\nproof\nThe proofs or the accepted manuscript.\n\n\n\nform\n\n\n\nValue\nMeaning\n\n\n\n\nfull\nThe published and corrected passages, quoted in full.\n\n\nbrief\nA one-line correction.\n\n\nnote\nAn explanation with no replacement text.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Errata"
+    ]
+  },
+  {
+    "objectID": "schemas/errata_entries.html#checks-the-render-runs",
+    "href": "schemas/errata_entries.html#checks-the-render-runs",
+    "title": "errata_entries.csv",
+    "section": "Checks the render runs",
+    "text": "Checks the render runs\n\nEvery id in claim_ids exists in the ground truth or the extraction.\nOnly quantity entries carry corrected_values, and there is one value per id.\nEvery corrected value appears in the corrected passage (or values_in_spans says why not).\nNo corrected value renders identically to the published one at the printed precision, since then there is nothing to correct.\nNo entry corrects a claim the pipeline reproduces.\nEvery quotation in published has been checked against an image of the printed page.\n\nThe ground truth’s corrected_here disposition is computed from claim_ids, which is why this table carries them.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Errata"
+    ]
+  },
+  {
+    "objectID": "schemas/archive_overwrites.html",
+    "href": "schemas/archive_overwrites.html",
+    "title": "ground_truth/archive_overwrites.csv",
+    "section": "",
+    "text": "One row per file that running the archive created, changed, or removed, in either pass (Stage 1). We found these by comparing every file’s checksum and modification time with the manifest after each run.\npass, file, effect, matches_deposit",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Archive overwrites"
+    ]
+  },
+  {
+    "objectID": "schemas/archive_overwrites.html#allowed-values-of-effect",
+    "href": "schemas/archive_overwrites.html#allowed-values-of-effect",
+    "title": "ground_truth/archive_overwrites.csv",
+    "section": "Allowed values of effect",
+    "text": "Allowed values of effect\n\n\n\n\n\n\n\n\nValue\nPass\nMeaning\n\n\n\n\nadded\neither\nThe run wrote a file the deposit does not contain.\n\n\noverwritten\nas_shipped\nThe run rewrote a file the deposit shipped.\n\n\nrebuilt\nstripped\nThe run regenerated an intermediate file that had been removed for the stripped pass.\n\n\nwithheld\nstripped\nAn intermediate file removed for the stripped pass that the run did not rebuild.\n\n\ndeleted\neither\nThe run removed a deposited file.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Archive overwrites"
+    ]
+  },
+  {
+    "objectID": "schemas/archive_overwrites.html#reading-it",
+    "href": "schemas/archive_overwrites.html#reading-it",
+    "title": "ground_truth/archive_overwrites.csv",
+    "section": "Reading it",
+    "text": "Reading it\noverwritten or rebuilt with matches_deposit = FALSE is the informative row. It means the deposited code, run today, does not produce the file the authors deposited: either the deposited file came from different code than the code that was deposited, or the software has moved since. The ground truth then has to say which (Stage 2).\nwithheld marks an intermediate that no deposited script produces. Any script that reads it can only run in the as-shipped pass, which leans on a file nobody can regenerate.\nA deposit that could not be run writes this table with a header and no rows.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Archive overwrites"
+    ]
+  },
+  {
+    "objectID": "rules/severity.html",
+    "href": "rules/severity.html",
+    "title": "Which errors go to the journal",
+    "section": "",
+    "text": "Active maintenance finds errors in bulk, and nearly all of them are trivial: a 2.9 that should have been a 3.0, panels of a figure in the wrong order, a misspelled name in a reference. The scientific contribution of the paper stands without the fix. A few are not trivial. This page describes how we decided which was which, and what we did with each.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Which errors go to the journal"
+    ]
+  },
+  {
+    "objectID": "rules/severity.html#three-tiers",
+    "href": "rules/severity.html#three-tiers",
+    "title": "Which errors go to the journal",
+    "section": "Three tiers",
+    "text": "Three tiers\n\nEvery error goes in the errata note, beside the maintained code, where anyone reading the repository will find it. The note is public, itemized, and computed from the code (see Stage 5).\nAn error that changes the direction or implications of a finding a reader would rely on also goes to the journal, as a corrigendum. In our experience these are rare.\nRetraction is for findings that can no longer be relied on at all.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Which errors go to the journal"
+    ]
+  },
+  {
+    "objectID": "rules/severity.html#why-not-send-everything",
+    "href": "rules/severity.html#why-not-send-everything",
+    "title": "Which errors go to the journal",
+    "section": "Why not send everything",
+    "text": "Why not send everything\nSending every author’s list of small corrections to every journal would bury the editors in notices that change nothing a reader would act on. A corrigendum is a signal that something important changed. Spent on typos and rounding slips, it stops being one. The errata note takes the volume, so that the journal notice can carry the weight.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Which errors go to the journal"
+    ]
+  },
+  {
+    "objectID": "rules/severity.html#where-the-line-comes-from",
+    "href": "rules/severity.html#where-the-line-comes-from",
+    "title": "Which errors go to the journal",
+    "section": "Where the line comes from",
+    "text": "Where the line comes from\nExisting policies say a good deal about the line between correction and retraction and little about the line between a corrigendum and no notice at all. We borrowed from both ends. The Committee on Publication Ethics reserves retraction for articles whose findings and conclusions cannot be relied upon, whatever the cause. Some medical journals ask for only a correction, even for pervasive errors, when the errors do not change the direction or implications of the results. Our second tier takes that phrase and applies it one level down: an error that changes the direction or implications of a finding warrants a notice in the journal, and one that does not can live in the errata.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Which errors go to the journal"
+    ]
+  },
+  {
+    "objectID": "rules/severity.html#the-abstract-is-not-the-test",
+    "href": "rules/severity.html#the-abstract-is-not-the-test",
+    "title": "Which errors go to the journal",
+    "section": "The abstract is not the test",
+    "text": "The abstract is not the test\nIt is tempting to send a corrigendum only for errors that touch the abstract. We did not use that test. The first error we sent to a journal concerned a persistence claim: the paper said the effect of fact-checks on factual beliefs was still detectable more than two weeks later at half its original size, and the corrected estimate was about a third of the original and could not be distinguished from zero. The claim was not the paper’s central finding and was not in the abstract. The article made it three times in the main text, though, and the durability of fact-checking effects is a question readers of that literature care about. A reader could rely on it, so it went to the journal.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Which errors go to the journal"
+    ]
+  },
+  {
+    "objectID": "rules/severity.html#when-a-corrigendum-goes-related-errors-go-with-it",
+    "href": "rules/severity.html#when-a-corrigendum-goes-related-errors-go-with-it",
+    "title": "Which errors go to the journal",
+    "section": "When a corrigendum goes, related errors go with it",
+    "text": "When a corrigendum goes, related errors go with it\nOnce a corrigendum was warranted, we used it to correct the related errors in the same article too, so that the published record and the errata note do not disagree. Unrelated trivial errors stayed in the note.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Which errors go to the journal"
+    ]
+  },
+  {
+    "objectID": "rules/severity.html#errors-an-earlier-correction-already-fixed",
+    "href": "rules/severity.html#errors-an-earlier-correction-already-fixed",
+    "title": "Which errors go to the journal",
+    "section": "Errors an earlier correction already fixed",
+    "text": "Errors an earlier correction already fixed\nSome errors had been corrected already, by a corrigendum published years before. Those are recorded with disposition = corrected_by_journal. Reading the article against the old corrigendum also turned up sentences that went on restating a finding the corrigendum had withdrawn. Each of those sentences is an erratum of its own, and they went into the note.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Which errors go to the journal"
+    ]
+  },
+  {
+    "objectID": "rules/severity.html#who-decides",
+    "href": "rules/severity.html#who-decides",
+    "title": "Which errors go to the journal",
+    "section": "Who decides",
+    "text": "Who decides\nWhether an error changes a conclusion is a judgment the pipeline cannot make. The agent drafted the errata and flagged the candidates; the author decided, and for anything sent to a journal the coauthors decided together. When an entry changes a conclusion, the errata note says so at the top.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Which errors go to the journal"
+    ]
+  },
+  {
+    "objectID": "rules/severity.html#how-the-tiers-appear-in-the-data",
+    "href": "rules/severity.html#how-the-tiers-appear-in-the-data",
+    "title": "Which errors go to the journal",
+    "section": "How the tiers appear in the data",
+    "text": "How the tiers appear in the data\nThe disposition column of the ground truth records what happened to each error (Stage 2):\n\n\n\n\n\n\n\ndisposition\nTier\n\n\n\n\ncorrected_here\nTier 1: an entry in this repository’s errata corrects it. Computed from the errata, never typed.\n\n\ncorrected_by_journal\nTier 2 (or an earlier correction): a published corrigendum or erratum corrects it.\n\n\ndocumented_only\nRecorded and deliberately not corrected, such as a value within simulation noise or an archive bug that never reached the page.\n\n\nnot_corrected\nKnown, and left uncorrected for a stated reason.\n\n\n\nEvery error in the printed text must have a disposition before the build passes, since an error nobody has decided about is unfinished.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Which errors go to the journal"
+    ]
+  },
+  {
+    "objectID": "rules/erratum.html",
+    "href": "rules/erratum.html",
+    "title": "What counts as an erratum",
+    "section": "",
+    "text": "An erratum is a statement printed in the article, its appendix, or its references that is wrong. The Stage 5 list of what that covers is long on purpose: wrong numbers, numbers rounded the wrong way, misdescriptions, bad labels, wrong cross-references, typos, and bad references all count, however small. Most of the work of applying the rule was in the cases at its edges, which this page collects.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "What counts as an erratum"
+    ]
+  },
+  {
+    "objectID": "rules/erratum.html#errors-versus-choices",
+    "href": "rules/erratum.html#errors-versus-choices",
+    "title": "What counts as an erratum",
+    "section": "Errors versus choices",
+    "text": "Errors versus choices\nThe line we drew is between implementation and analysis. An erratum is a place where the paper did not do what it says it did, or says something its own analysis does not support. A choice we would make differently today is not an erratum, however strongly we now prefer the alternative.\nErrors, in our usage:\n\na typo in a variable name, a wrong index, or the wrong column;\na standardization that divides by the wrong group’s standard deviation;\na covariate left in (or out of) a specification the paper describes differently, such as wave 2 outcomes copied into a wave 3 model;\na number in the text left over from an earlier draft of the analysis;\na sentence that describes the sample, the estimator, or a variable differently from what the code does.\n\nChoices, which we left alone:\n\nthe estimator, the standard errors, and the covariate set the paper used;\nthe sample definition, including exclusions we would not make now;\nthe outcome scaling, the plotting decisions, and the tables a paper chose to show.\n\nThe rewrite keeps every one of those choices (see Stage 3). An errata note that relitigated them would become a second paper, and a reader could no longer tell the mistakes from the second thoughts.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "What counts as an erratum"
+    ]
+  },
+  {
+    "objectID": "rules/erratum.html#the-gray-area-collinear-covariates",
+    "href": "rules/erratum.html#the-gray-area-collinear-covariates",
+    "title": "What counts as an erratum",
+    "section": "The gray area: collinear covariates",
+    "text": "The gray area: collinear covariates\nA regression with collinear covariates is rank-deficient, and the software drops a column to fit it. Which column it drops depends on column order and on the software version, so the printed estimate depends on an accident rather than on a decision anyone made. The paper’s own description of the model says what was intended, and the fitted model is not that model. We ruled that these count as errata and corrected them.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "What counts as an erratum"
+    ]
+  },
+  {
+    "objectID": "rules/erratum.html#when-everything-matches-and-the-paper-is-still-wrong",
+    "href": "rules/erratum.html#when-everything-matches-and-the-paper-is-still-wrong",
+    "title": "What counts as an erratum",
+    "section": "When everything matches and the paper is still wrong",
+    "text": "When everything matches and the paper is still wrong\nAgreement among the page, the archive, and the rewrite shows consistency, not correctness. A paper can print exactly what its code produced while the code has a bug, and a rewrite written against the archive can inherit the same bug. One paper summed vote shares across merged precincts instead of recomputing them, and every comparison matched. Reading the deposited code, rather than only running it, found that error and others like it. Such an error is still an erratum; in the ground truth it carries the locus archive even though every comparison reads TRUE.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "What counts as an erratum"
+    ]
+  },
+  {
+    "objectID": "rules/erratum.html#the-text-against-its-own-tables",
+    "href": "rules/erratum.html#the-text-against-its-own-tables",
+    "title": "What counts as an erratum",
+    "section": "The text against its own tables",
+    "text": "The text against its own tables\nWhen a sentence disagreed with the paper’s own table and our computation supported the table, we corrected the sentence. When we could not tell which of two deposited values the authors meant (two versions of a variable, say, each defensible), we did not pick one. We wrote the finding up as a note for the authors to decide.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "What counts as an erratum"
+    ]
+  },
+  {
+    "objectID": "rules/erratum.html#approximations",
+    "href": "rules/erratum.html#approximations",
+    "title": "What counts as an erratum",
+    "section": "Approximations",
+    "text": "Approximations\nA number the text hedges (“about”, “roughly”, “nearly”, “on the order of”) is held to what the hedge could reasonably mean. A number the text states without a hedge is held to its printed digits, even when the true value is close. A sentence that says effects run “between 0.30 and 0.50 standard deviations”, about estimates of 0.283 and 0.522, is an erratum: both estimates fall outside the interval as written. The details, including how wide a hedge is allowed to be, are in rounding.md.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "What counts as an erratum"
+    ]
+  },
+  {
+    "objectID": "rules/erratum.html#what-we-left-out",
+    "href": "rules/erratum.html#what-we-left-out",
+    "title": "What counts as an erratum",
+    "section": "What we left out",
+    "text": "What we left out\n\nDifferences within simulation noise. A value from a random procedure that falls inside the distribution of that value over seeds is not an error. See stochastic.md.\nFindings we could not judge. When we looked and could not tell whether the paper was wrong, the ground truth records defect_locus = unresolved and the errata say nothing. An erratum we were not sure of would itself be an error.\nDefects the reader never sees. A bug in the deposited code that the rewrite repairs but that never reached a printed number is recorded in the ground truth (documented_only) and is not an erratum, because nothing on the page is wrong.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "What counts as an erratum"
+    ]
+  },
+  {
+    "objectID": "rules/erratum.html#who-decides",
+    "href": "rules/erratum.html#who-decides",
+    "title": "What counts as an erratum",
+    "section": "Who decides",
+    "text": "Who decides\nThe agent proposes and the author decides. Whether a discrepancy is an error or a choice, and whether a correction changes a conclusion, were the author’s calls in every case, and for any correction sent to a journal they were the coauthors’ calls too. For most papers these decisions took about a quarter of an hour; the hardest took a couple of hours each.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "What counts as an erratum"
+    ]
+  },
+  {
+    "objectID": "agent/session_start.html",
+    "href": "agent/session_start.html",
+    "title": "Session start",
+    "section": "",
+    "text": "Paste or point the agent to the following at the start of each working session, with the bracketed parts filled in.\n\nYou are helping me actively maintain the replication archive for one of my published papers: [citation], with its deposit at [deposit DOI], in the repository at [path].\nRead these first:\n\nThe guide’s README, and the stage file for the stage we are working on today: [stage], in both stages/ and agent/.\nrules/erratum.md, rules/rounding.md, rules/stochastic.md, rules/severity.md, and traps.md.\nThe schema in schemas/ for every table you will write or read today.\nThe repository’s STYLE.md, if it exists, and its notes from earlier sessions, if any.\n\nThen tell me, in a few lines, the state of the repository: which stages are done according to each stage’s “Done when” list, what is failing, and what you propose to do in this session. Wait for my answer before changing anything.\nGround rules for every session:\n\nDo not change, move, or delete anything in the downloaded deposit. Run deposited code only in a scratch copy.\nNever type a computed value into a table. Only the values printed in the article are transcribed; everything else is generated by code in the repository.\nNever use a published number as an input to the rewrite.\nWhen a check fails, find out why before changing the check.\nWhen you find a possible error in the paper, record the evidence and propose a classification. Whether it is an error, whether it changes a conclusion, and what to do about it are my decisions.\nReport every number about the paper from a command you ran in this session.\nBefore ending the session, write down what you did, what is still failing, and what comes next, in the repository’s notes.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Session start"
+    ]
+  },
+  {
+    "objectID": "agent/05_errata.html",
+    "href": "agent/05_errata.html",
+    "title": "Stage 5 for agents: errata",
+    "section": "",
+    "text": "Source of truth: stages/05_errata.md. Schema: errata_entries.md. Rules: erratum.md, severity.md.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 5 for agents: errata"
+    ]
+  },
+  {
+    "objectID": "agent/05_errata.html#goal",
+    "href": "agent/05_errata.html#goal",
+    "title": "Stage 5 for agents: errata",
+    "section": "Goal",
+    "text": "Goal\nOne itemized errata note per paper, rendered to PDF, with every corrected value computed at render time, and a matching errata_entries.csv.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 5 for agents: errata"
+    ]
+  },
+  {
+    "objectID": "agent/05_errata.html#do",
+    "href": "agent/05_errata.html#do",
+    "title": "Stage 5 for agents: errata",
+    "section": "Do",
+    "text": "Do\n\nDraft an entry for every error the earlier stages found, and for errors found by reading the article against itself, its appendix, its code, its references (checked against Crossref), and any earlier correction.\nFor each entry, set class, source, and form; quote the published passage and write the corrected one, marking each changed span [[like this]]; write a note explaining what was wrong and what the correction rests on; and list the claim_ids it corrects.\nCompute every corrected value from the rewrite’s output when errata.qmd renders.\nMake the render check that: every claim id exists; only quantity entries carry corrected values, one per id; every corrected value appears in the corrected passage; no corrected value renders identically to the published one at the printed precision; and no entry corrects a claim the pipeline reproduces.\nCheck every quotation against an image of the published page.\nOrder the entries by severity, most serious first, and propose which entries, if any, change a conclusion and which meet the bar for a corrigendum.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 5 for agents: errata"
+    ]
+  },
+  {
+    "objectID": "agent/05_errata.html#do-not",
+    "href": "agent/05_errata.html#do-not",
+    "title": "Stage 5 for agents: errata",
+    "section": "Do not",
+    "text": "Do not\n\nInclude differences within simulation noise, findings you could not judge, or analysis choices.\nType a corrected value.\nQuote from extracted PDF text without checking the page image.\nRenumber entries once the note is public. Add new entries at the end.\nDecide whether a conclusion changes, or whether anything goes to a journal.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 5 for agents: errata"
+    ]
+  },
+  {
+    "objectID": "agent/05_errata.html#stop-and-ask-the-author",
+    "href": "agent/05_errata.html#stop-and-ask-the-author",
+    "title": "Stage 5 for agents: errata",
+    "section": "Stop and ask the author",
+    "text": "Stop and ask the author\n\nBefore finalizing the list of entries: the author decides which candidates are errors.\nFor every entry that might change a conclusion.\nBefore anything is sent to a journal or to coauthors.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 5 for agents: errata"
+    ]
+  },
+  {
+    "objectID": "agent/05_errata.html#done-when",
+    "href": "agent/05_errata.html#done-when",
+    "title": "Stage 5 for agents: errata",
+    "section": "Done when",
+    "text": "Done when\nerrata.qmd renders without error, every corrected value is computed, every quotation has been checked against the published page, the render’s checks pass, and every paper_internal row in the ground truth has a disposition.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 5 for agents: errata"
+    ]
+  },
+  {
+    "objectID": "agent/03_rewrite.html",
+    "href": "agent/03_rewrite.html",
+    "title": "Stage 3 for agents: maintained rewrite",
+    "section": "",
+    "text": "Source of truth: stages/03_rewrite.md. Rules: erratum.md. Style: the repository’s STYLE.md.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 3 for agents: maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "agent/03_rewrite.html#goal",
+    "href": "agent/03_rewrite.html#goal",
+    "title": "Stage 3 for agents: maintained rewrite",
+    "section": "Goal",
+    "text": "Goal\nNew code, on current packages, that reproduces every table, figure, and number in the paper from the deposited data.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 3 for agents: maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "agent/03_rewrite.html#do",
+    "href": "agent/03_rewrite.html#do",
+    "title": "Stage 3 for agents: maintained rewrite",
+    "section": "Do",
+    "text": "Do\n\nWrite one script per table or figure, named for what it produces, with cleaning separate from analysis and shared functions in one helpers file. Follow STYLE.md.\nWrite everything to maintained/output/. Beside every figure, write a CSV of every quantity it plots. Beside every formatted table, write its values unrounded.\nKeep the paper’s estimator, specification, sample, standard errors, and seed.\nCorrect unambiguous coding errors (a wrong variable, index, or column; a covariate the paper’s description says should or should not be there; a rank-deficient model that silently dropped a column). Record each correction for the ground truth and the errata.\nUse the current random-number generator. Where it moves a published number, the ground truth records environment.\nCompare every rendered figure with the published one by eye, in addition to its numbers.\nBlank the timestamps in PDF output.\nRun run_all.R twice from fresh sessions, check both exit statuses, and confirm the second run leaves maintained/output/ byte-identical.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 3 for agents: maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "agent/03_rewrite.html#do-not",
+    "href": "agent/03_rewrite.html#do-not",
+    "title": "Stage 3 for agents: maintained rewrite",
+    "section": "Do not",
+    "text": "Do not\n\nUse any published number as an input. If a script seems to need one, the computation upstream is missing.\nWrite a script that returns early because its output already exists.\nAccept a comment saying a number “can’t be computed” from the deposit without trying.\nChange an analysis choice because STYLE.md or current practice prefers another.\nCarry a deposited bug into the rewrite because the archive has it.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 3 for agents: maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "agent/03_rewrite.html#stop-and-ask-the-author",
+    "href": "agent/03_rewrite.html#stop-and-ask-the-author",
+    "title": "Stage 3 for agents: maintained rewrite",
+    "section": "Stop and ask the author",
+    "text": "Stop and ask the author\n\nWhen it is unclear whether a discrepancy is a coding error or an analysis choice.\nWhen two deposited values are both defensible and the paper does not say which was meant.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 3 for agents: maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "agent/03_rewrite.html#done-when",
+    "href": "agent/03_rewrite.html#done-when",
+    "title": "Stage 3 for agents: maintained rewrite",
+    "section": "Done when",
+    "text": "Done when\nrun_all.R runs from a clean session, every table and figure has a script that produces it, no published value is an input, and two runs in a row leave maintained/output/ unchanged.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 3 for agents: maintained rewrite"
+    ]
+  },
+  {
+    "objectID": "agent/01_archive_check.html",
+    "href": "agent/01_archive_check.html",
+    "title": "Stage 1 for agents: archive check",
+    "section": "",
+    "text": "Source of truth: stages/01_archive_check.md. Schemas: original_manifest.md, archive_run_status.md, archive_overwrites.md.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 1 for agents: archive check"
+    ]
+  },
+  {
+    "objectID": "agent/01_archive_check.html#goal",
+    "href": "agent/01_archive_check.html#goal",
+    "title": "Stage 1 for agents: archive check",
+    "section": "Goal",
+    "text": "Goal\nA verified manifest of the deposit, a download script that stops on any discrepancy, and a record of what happens when the deposited code runs.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 1 for agents: archive check"
+    ]
+  },
+  {
+    "objectID": "agent/01_archive_check.html#do",
+    "href": "agent/01_archive_check.html#do",
+    "title": "Stage 1 for agents: archive check",
+    "section": "Do",
+    "text": "Do\n\nBuild original_manifest.csv from the archive’s API, not by hand, with every checksum the archive publishes and every file’s byte size. For Dataverse, request each file in its original format.\nWrite download_original.R to download every listed file into original/, stop on any size or served-checksum mismatch, print any published-checksum mismatch, stop on any file in original/ the manifest does not list (hidden files included), and unpack any zip or RAR into its own folder checked against a second manifest.\nMake it the first step of run_all.R, and run it.\nBefore running any deposited code, search it for every call that writes a file, after joining continued lines.\nCopy the deposit to a scratch folder and run each deposited script there, twice: once as shipped, and once with every intermediate file the deposit ships removed. Run under the software of the paper’s day where it matters (for R code from before April 2019 that draws with sample(), RNGkind(sample.kind = \"Rounding\")). Capture printed output: in R, source with print.eval = TRUE.\nWrite one row per script per pass to ground_truth/archive_run_status.csv, including not_run rows with the reason for anything you could not run.\nAfter each pass, compare every file with the manifest and write what was added, overwritten, rebuilt, withheld, or deleted to ground_truth/archive_overwrites.csv.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 1 for agents: archive check"
+    ]
+  },
+  {
+    "objectID": "agent/01_archive_check.html#do-not",
+    "href": "agent/01_archive_check.html#do-not",
+    "title": "Stage 1 for agents: archive check",
+    "section": "Do not",
+    "text": "Do not\n\nRun deposited code in original/, or edit any deposited file.\nFix the deposited code. Record why each failure happened; the failures are part of the record.\nTreat a clean exit as reproduction. Whether the archive reproduces the paper is decided in Stage 2.\nAccept a deprecation warning, or a recorded “package removed”, as the cause of a failure without testing it.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 1 for agents: archive check"
+    ]
+  },
+  {
+    "objectID": "agent/01_archive_check.html#stop-and-ask-the-author",
+    "href": "agent/01_archive_check.html#stop-and-ask-the-author",
+    "title": "Stage 1 for agents: archive check",
+    "section": "Stop and ask the author",
+    "text": "Stop and ask the author\n\nWhen the published and served checksums disagree for a file that is not a converted tabular file.\nWhen a script needs software you cannot run (Stata, a licensed dataset).",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 1 for agents: archive check"
+    ]
+  },
+  {
+    "objectID": "agent/01_archive_check.html#done-when",
+    "href": "agent/01_archive_check.html#done-when",
+    "title": "Stage 1 for agents: archive check",
+    "section": "Done when",
+    "text": "Done when\nThe manifest verifies, the download script stops on any mismatch, and every deposited script has a row in archive_run_status.csv for each pass.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 1 for agents: archive check"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Active maintenance: a guide",
+    "section": "",
+    "text": "In 2021, Limor Peer, Lilla Orr, and I proposed that researchers “actively maintain” their replication archives, updating the code as the software around it changes, so that published results stay reproducible for years rather than months (Peer, Orr, and Coppock 2021, PS: Political Science & Politics). For a long time, none of us did it, because it was a lot of work. With AI coding agents the work became cheap enough that I went back and did it for my published books and articles. This repository records how we did it, in enough detail that you could do the same for your own papers.\nThe guide is written for people. Each stage also has a companion file in agent/ that says the same thing as instructions a coding agent can follow. If the two ever disagree, the version written for people is the one we meant.",
+    "crumbs": [
+      "All maintained papers",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#what-a-finished-repository-does",
+    "href": "index.html#what-a-finished-repository-does",
+    "title": "Active maintenance: a guide",
+    "section": "What a finished repository does",
+    "text": "What a finished repository does\nEach paper ended up with its own public repository that:\n\nfetches the original deposit from its archive and checks every file against a checksum manifest (the data stay where they were deposited, and are never copied into the repository);\nrecords which of the deposited scripts still run;\nholds a maintained rewrite that reproduces every table, figure, and number in the text from the deposited data, on current software;\nholds a ground truth, one generated table that compares each printed number with what the original code produces and with what the rewrite produces;\nchecks every claim in the text a second, independent way, by quoting the sentence and recomputing its number; and\npublishes an itemized errata note, whose corrected values the code computes rather than someone typing them in.\n\nEach repository then got a permanent DOI from Zenodo, a link back from the original deposit, and a scheduled job that reruns the whole pipeline every eight weeks, so that we hear about it when a package update moves a number.",
+    "crumbs": [
+      "All maintained papers",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#the-stages",
+    "href": "index.html#the-stages",
+    "title": "Active maintenance: a guide",
+    "section": "The stages",
+    "text": "The stages\n\n\n\nStage\nWhat happens\nWhat it produces\n\n\n\n\n0. Setup and style\nGather the paper and anything else that can settle a question about it; set up the repository; write down how you like your code written.\nSTYLE.md, the published PDFs, the repository skeleton\n\n\n1. Archive check\nFetch and verify the deposit, and run it as it was shipped.\noriginal_manifest.csv, download_original.R, archive_run_status.csv, archive_overwrites.csv\n\n\n2. Ground truth\nList every number the paper prints, and compare each with the archive and the rewrite.\n&lt;paper_id&gt;_ground_truth.csv, float_coverage.csv\n\n\n3. Maintained rewrite\nRewrite the code, one script per table or figure, on current packages.\nmaintained/, maintained/output/\n\n\n4. Claims\nExtract every claim in the text, numeric or not, and check each one a second way.\npublished_claims.csv, in_text_claims.R\n\n\n5. Errata\nWrite up each error with a computed correction, and decide which, if any, belong in a journal notice.\nerrata.qmd, &lt;paper_id&gt;_errata.pdf, errata_entries.csv\n\n\n6. Report and publish\nRender the README, publish and archive the repository, link the deposit to it, and schedule the check.\nREADME.qmd, a DOI, a scheduled check\n\n\n\nThe archive check and the ground truth come before the rewrite because the rewrite is judged against them. The ground truth also starts from the article rather than from the code, for a reason Stage 2 explains: a number the pipeline never computes would otherwise never be compared with anything.",
+    "crumbs": [
+      "All maintained papers",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#what-it-cost",
+    "href": "index.html#what-it-cost",
+    "title": "Active maintenance: a guide",
+    "section": "What it cost",
+    "text": "What it cost\nOur papers ranged from two-page research notes to a book, and the cost varied with them:\n\nAgent time. Most of the work is done by the agent. A typical paper took a handful of working sessions spread over a few days; a long paper with a large appendix took several times that.\nMy time. For most papers, about 15 minutes to read the errata and decide what to do about them. For the hardest few, about two hours each, mostly spent weighing how serious an error was and digging up old files that could explain it.\nCompute. Most pipelines run in a few minutes. Our slowest, a large simulation study, takes most of a day on a laptop.\n\nThe early papers took far longer than the later ones, because we were working out the procedure as we went. With the procedure written down, a new paper should go faster.",
+    "crumbs": [
+      "All maintained papers",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#what-it-found",
+    "href": "index.html#what-it-found",
+    "title": "Active maintenance: a guide",
+    "section": "What it found",
+    "text": "What it found\nErrors turned out to be common. A small share of all the claims our papers print were wrong, but most of the papers printed at least one wrong number, and nearly all of them had a mistake of some kind once typos and reference errors are counted. Most errors were small: a number in the text left over from an earlier draft, a value rounded the wrong way, two panels of a figure in the wrong order. Errors that change a conclusion were rare, and when we found one we sent a corrigendum to the journal. If your experience is like ours, you will find errors too.",
+    "crumbs": [
+      "All maintained papers",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#languages-other-than-r",
+    "href": "index.html#languages-other-than-r",
+    "title": "Active maintenance: a guide",
+    "section": "Languages other than R",
+    "text": "Languages other than R\nOur papers were written in R, so the templates and examples are in R. The stages, the table formats, the checks, and the rules for judging errors are not tied to R, and languages.md lists the Stata and Python counterparts of the R tools we used. Stage 4 describes how each claim gets its verdict; the R package excheckr implements those rules, and nothing stops anyone from implementing them in another language.",
+    "crumbs": [
+      "All maintained papers",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#what-is-in-this-repository",
+    "href": "index.html#what-is-in-this-repository",
+    "title": "Active maintenance: a guide",
+    "section": "What is in this repository",
+    "text": "What is in this repository\n\nstages/: one file per stage, with its purpose, inputs, outputs, checks, and the judgment calls it involves.\nschemas/: the columns and allowed values of every table the procedure produces.\nrules/: the judgments that kept coming up (what counts as an erratum, rounding, simulation noise, and when an error needs a journal notice).\ntemplates/: starting files for a new repository.\nagent/: the stages as instructions for a coding agent.\ntraps.md: problems we ran into more than once, and how we got around them.\nlanguages.md: Stata and Python counterparts of the R tools.\nexamples/: finished repositories from our collection, and an example STYLE.md.",
+    "crumbs": [
+      "All maintained papers",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "index.html#license",
+    "href": "index.html#license",
+    "title": "Active maintenance: a guide",
+    "section": "License",
+    "text": "License\nCC0. Take whatever is useful.",
+    "crumbs": [
+      "All maintained papers",
+      "Overview"
+    ]
+  },
+  {
+    "objectID": "agent/00_setup.html",
+    "href": "agent/00_setup.html",
+    "title": "Stage 0 for agents: setup and style",
+    "section": "",
+    "text": "Source of truth: stages/00_setup.md.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 0 for agents: setup and style"
+    ]
+  },
+  {
+    "objectID": "agent/00_setup.html#goal",
+    "href": "agent/00_setup.html#goal",
+    "title": "Stage 0 for agents: setup and style",
+    "section": "Goal",
+    "text": "Goal\nA repository skeleton, the published record in hand, the deposit identified, and an approved STYLE.md.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 0 for agents: setup and style"
+    ]
+  },
+  {
+    "objectID": "agent/00_setup.html#do",
+    "href": "agent/00_setup.html#do",
+    "title": "Stage 0 for agents: setup and style",
+    "section": "Do",
+    "text": "Do\n\nCollect the publisher’s rendered PDFs: the article (version of record), the online appendix, and any published corrigendum. Do not use a preprint or accepted manuscript as a source of published values.\nFind the replication deposit and record its DOI. Do not copy the data into the repository.\nAsk the author which materials outside the deposit exist (production .tex or .docx, proofs, accepted manuscript, old working scripts) and where they are. Treat a working-folder .tex as the published text only if its compiled PDF matches the publisher’s.\nCreate the repository with the layout in the stage file: run_all.R (or the language’s equivalent), download_original.R, maintained/, maintained/output/, ground_truth/, errata.qmd, README.qmd, a .gitignore that excludes original/, and a license.\nUse paths relative to the repository root everywhere.\nRead the recent code the author points you to, and draft STYLE.md: script organization, naming, data manipulation idioms, modeling defaults, figures (with a CSV of plotted values beside each), tables, and things to avoid. Quote examples from the author’s code.\nGive the draft to the author and revise it until they approve it. Commit the approved version.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 0 for agents: setup and style"
+    ]
+  },
+  {
+    "objectID": "agent/00_setup.html#do-not",
+    "href": "agent/00_setup.html#do-not",
+    "title": "Stage 0 for agents: setup and style",
+    "section": "Do not",
+    "text": "Do not\n\nLet STYLE.md override the paper’s own choices. The rewrite keeps the original estimator, specification, sample, standard errors, and seed whatever STYLE.md prefers. Say so in STYLE.md.\nUse materials outside the deposit as inputs to the rewrite. They explain errors; they do not supply numbers.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 0 for agents: setup and style"
+    ]
+  },
+  {
+    "objectID": "agent/00_setup.html#stop-and-ask-the-author",
+    "href": "agent/00_setup.html#stop-and-ask-the-author",
+    "title": "Stage 0 for agents: setup and style",
+    "section": "Stop and ask the author",
+    "text": "Stop and ask the author\n\nWhen you cannot find the deposit, or find more than one version of it.\nWhen a corrigendum or erratum exists and you are unsure which version of a passage is the one to check.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 0 for agents: setup and style"
+    ]
+  },
+  {
+    "objectID": "agent/00_setup.html#done-when",
+    "href": "agent/00_setup.html#done-when",
+    "title": "Stage 0 for agents: setup and style",
+    "section": "Done when",
+    "text": "Done when\nThe repository exists with its entry point and layout, the published PDFs are in hand, the deposit DOI is recorded, and an approved STYLE.md is committed.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 0 for agents: setup and style"
+    ]
+  },
+  {
+    "objectID": "agent/02_ground_truth.html",
+    "href": "agent/02_ground_truth.html",
+    "title": "Stage 2 for agents: ground truth",
+    "section": "",
+    "text": "Source of truth: stages/02_ground_truth.md. Schemas: ground_truth.md, float_coverage.md. Rules: rounding.md, stochastic.md.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 2 for agents: ground truth"
+    ]
+  },
+  {
+    "objectID": "agent/02_ground_truth.html#goal",
+    "href": "agent/02_ground_truth.html#goal",
+    "title": "Stage 2 for agents: ground truth",
+    "section": "Goal",
+    "text": "Goal\nOne generated table comparing every printed number with the archive’s value and the rewrite’s value, and a coverage table saying how much of each float it checks.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 2 for agents: ground truth"
+    ]
+  },
+  {
+    "objectID": "agent/02_ground_truth.html#do",
+    "href": "agent/02_ground_truth.html#do",
+    "title": "Stage 2 for agents: ground truth",
+    "section": "Do",
+    "text": "Do\n\nList every table and figure from the article and appendix themselves, and write a row for each in float_coverage.csv.\nTranscribe every printed value from images of the published pages, as strings, with their printed precision. Read multi-column tables from the rendered page, not from extracted text. Read numbers printed on a figure by position.\nWrite ground_truth/build_ground_truth.R, run last by run_all.R. It starts from the transcribed values and joins them to the archive’s values (from the Stage 1 runs) and the rewrite’s values (from maintained/output/, at full precision).\nCompare at the printed precision, by formatting the computed value and comparing strings, after the normalizations in rules/rounding.md. Compare the archive at the coarser of the page’s precision and the precision the deposited code printed.\nFor values from random draws, first confirm that something draws at random. For unseeded values, compare against the distribution over many seeds, leave match_rewrite as NA, and record the verdict in holds.\nOn every row where a comparison fails, set defect_locus where the row is built, and propose a disposition. Compute corrected_here from errata_entries.csv.\nMake the build stop if: a printed value has been read as a number; a failing row has no locus or a passing row has one (apart from the documented exception); a paper_internal row has no disposition; any join is not one-to-one; or a float is missing from float_coverage.csv.\nCompute every count in float_coverage.csv.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 2 for agents: ground truth"
+    ]
+  },
+  {
+    "objectID": "agent/02_ground_truth.html#do-not",
+    "href": "agent/02_ground_truth.html#do-not",
+    "title": "Stage 2 for agents: ground truth",
+    "section": "Do not",
+    "text": "Do not\n\nType any value except the printed ones.\nSelect a row by its printed value.\nRead the printed values with automatic type guessing.\nCount a float as covered because it has one row, or because it prints no numbers.\nSet a default locus for the whole table.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 2 for agents: ground truth"
+    ]
+  },
+  {
+    "objectID": "agent/02_ground_truth.html#stop-and-ask-the-author",
+    "href": "agent/02_ground_truth.html#stop-and-ask-the-author",
+    "title": "Stage 2 for agents: ground truth",
+    "section": "Stop and ask the author",
+    "text": "Stop and ask the author\n\nWhen the page, the archive, and the rewrite disagree and you cannot tell which is wrong (propose unresolved).\nWhen a value is wrong in a way that may change a conclusion.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 2 for agents: ground truth"
+    ]
+  },
+  {
+    "objectID": "agent/02_ground_truth.html#done-when",
+    "href": "agent/02_ground_truth.html#done-when",
+    "title": "Stage 2 for agents: ground truth",
+    "section": "Done when",
+    "text": "Done when\nThe build runs last in run_all.R and passes all of its checks.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 2 for agents: ground truth"
+    ]
+  },
+  {
+    "objectID": "agent/04_claims.html",
+    "href": "agent/04_claims.html",
+    "title": "Stage 4 for agents: claims",
+    "section": "",
+    "text": "Source of truth: stages/04_claims.md. Schema: published_claims.md. Verdict logic: languages.md.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 4 for agents: claims"
+    ]
+  },
+  {
+    "objectID": "agent/04_claims.html#goal",
+    "href": "agent/04_claims.html#goal",
+    "title": "Stage 4 for agents: claims",
+    "section": "Goal",
+    "text": "Goal\nEvery claim in the article and appendix, numeric or not, extracted, classified, and checked by code that quotes the sentence and recomputes it.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 4 for agents: claims"
+    ]
+  },
+  {
+    "objectID": "agent/04_claims.html#do",
+    "href": "agent/04_claims.html#do",
+    "title": "Stage 4 for agents: claims",
+    "section": "Do",
+    "text": "Do\n\nExtract every numeric token from the article and appendix, then sweep again for numbers written as words.\nRead for claims with no number: significance, direction, order, persistence, and counts in words.\nClassify each claim (pipeline, descriptive, definitional, structural, transcribed), store the printed value as text with its precision, and set comparison and needs_block. Write ground_truth/published_claims.csv.\nCompare the descriptive and definitional classifications within each section, and make the same sentence construction get the same type.\nWrite maintained/in_text_claims.R with one block per claim with needs_block = TRUE. Each block quotes the sentence verbatim in a comment and recomputes the claim from maintained/output/ or the cleaned data.\nWhere a block declares range, derived, or shape, make the block’s code test the condition. For a hedged number, make the block test the half-step bound in rules/rounding.md, since the check does not.\nRun the file on its own, and check that the printed claim ids are exactly the needs_block ids.\nReconcile with the ground truth: every claim in both must have the same printed value, precision, and type, and where both compute a value, they must agree.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 4 for agents: claims"
+    ]
+  },
+  {
+    "objectID": "agent/04_claims.html#do-not",
+    "href": "agent/04_claims.html#do-not",
+    "title": "Stage 4 for agents: claims",
+    "section": "Do not",
+    "text": "Do not\n\nRead the ground truth from the claims script. The two checks must be independent.\nRefit models in the claims script.\nDeclare a verdict a block has not tested.\nTreat an unhedged approximation as hedged.\nInvent a computation for a quantity nothing in the paper or deposit identifies.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 4 for agents: claims"
+    ]
+  },
+  {
+    "objectID": "agent/04_claims.html#stop-and-ask-the-author",
+    "href": "agent/04_claims.html#stop-and-ask-the-author",
+    "title": "Stage 4 for agents: claims",
+    "section": "Stop and ask the author",
+    "text": "Stop and ask the author\n\nWhen a claim with no number appears not to hold.\nWhen the two instruments disagree and you cannot tell which is wrong.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 4 for agents: claims"
+    ]
+  },
+  {
+    "objectID": "agent/04_claims.html#done-when",
+    "href": "agent/04_claims.html#done-when",
+    "title": "Stage 4 for agents: claims",
+    "section": "Done when",
+    "text": "Done when\nEvery claim is in published_claims.csv, every claim that needs a check has one, the printed count equals the declared count, the two instruments agree, and the summary line shows no failing verdicts.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 4 for agents: claims"
+    ]
+  },
+  {
+    "objectID": "agent/06_publish.html",
+    "href": "agent/06_publish.html",
+    "title": "Stage 6 for agents: report and publish",
+    "section": "",
+    "text": "Source of truth: stages/06_publish.md.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 6 for agents: report and publish"
+    ]
+  },
+  {
+    "objectID": "agent/06_publish.html#goal",
+    "href": "agent/06_publish.html#goal",
+    "title": "Stage 6 for agents: report and publish",
+    "section": "Goal",
+    "text": "Goal\nA README a stranger can follow, a public repository with a permanent DOI, a link from the original deposit, and a scheduled check.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 6 for agents: report and publish"
+    ]
+  },
+  {
+    "objectID": "agent/06_publish.html#do",
+    "href": "agent/06_publish.html#do",
+    "title": "Stage 6 for agents: report and publish",
+    "section": "Do",
+    "text": "Do\n\nWrite README.qmd for someone arriving from the article: what the repository is, a table of verified DOIs (article, deposit, repository), how to run it, an overview of the paper, whether the archive runs, the errata, the ground truth and each float’s coverage, the two claim checks, the rewrite, and the software environment.\nCompute every quantity in the README’s prose with inline code.\nRun the whole pipeline once more and confirm it leaves no stray or changed files. Check file names against a case-sensitive file system.\nWrite .zenodo.json with the title, creators, license, and related identifiers: the article (isSupplementTo), the deposit (isDerivedFrom), and the repository URL, listed explicitly.\nPrepare the line that links the deposit to the maintained version (the Zenodo concept DOI and the repository URL), for Dataverse’s Related Material field or the OSF project description.\nAdd the scheduled check workflow, and confirm it passes once.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 6 for agents: report and publish"
+    ]
+  },
+  {
+    "objectID": "agent/06_publish.html#do-not",
+    "href": "agent/06_publish.html#do-not",
+    "title": "Stage 6 for agents: report and publish",
+    "section": "Do not",
+    "text": "Do not\n\nWrite the history of the project into the README.\nCopy the deposit into the repository.\nPin old package versions to make a failing check pass; update the rewrite instead.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 6 for agents: report and publish"
+    ]
+  },
+  {
+    "objectID": "agent/06_publish.html#stop-and-ask-the-author",
+    "href": "agent/06_publish.html#stop-and-ask-the-author",
+    "title": "Stage 6 for agents: report and publish",
+    "section": "Stop and ask the author",
+    "text": "Stop and ask the author\n\nBefore making the repository public, creating a GitHub release, or publishing at Zenodo. Each is visible to others and hard to undo.\nBefore editing any deposit’s metadata. Deposits in a journal’s collection, or made by a coauthor, need their curators or owners.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 6 for agents: report and publish"
+    ]
+  },
+  {
+    "objectID": "agent/06_publish.html#done-when",
+    "href": "agent/06_publish.html#done-when",
+    "title": "Stage 6 for agents: report and publish",
+    "section": "Done when",
+    "text": "Done when\nThe README renders with every number computed, the repository is public, its Zenodo DOI resolves and appears in the README and the errata, the original deposit links to it, and the scheduled check has passed at least once.",
+    "crumbs": [
+      "All maintained papers",
+      "For agents",
+      "Stage 6 for agents: report and publish"
+    ]
+  },
+  {
+    "objectID": "languages.html",
+    "href": "languages.html",
+    "title": "Languages other than R",
+    "section": "",
+    "text": "Needs review. Our code was R, so the R column below is what we used, and the Stata and Python columns are not. We drafted them from each language’s documentation, not from running the procedure in it. If you work in Stata or Python and find something wrong or missing, please open an issue.\nThe procedure does not depend on R. What it needs from a language is a short list of capabilities: build paths from the project root, run everything from one entry point, fix the random-number generator, compute the paper’s standard errors, write unrounded output beside every table and figure, verify downloads by checksum, read printed values as text, and format a number at a given precision. This page maps each one.",
+    "crumbs": [
+      "All maintained papers",
+      "Languages other than R"
+    ]
+  },
+  {
+    "objectID": "languages.html#counterparts",
+    "href": "languages.html#counterparts",
+    "title": "Languages other than R",
+    "section": "Counterparts",
+    "text": "Counterparts\n\n\n\n\n\n\n\n\n\nNeed\nR (what we used)\nStata\nPython\n\n\n\n\nPaths from the project root\nhere::here(), anchored by here::i_am()\nA global set once in the master do-file (global root \"...\"), with every path built from it; no cd inside scripts\npathlib.Path, anchored at the repository root (for example with pyprojroot)\n\n\nOne entry point that stops at the first failure\nrun_all.R, sourcing scripts in order\nA master .do file calling each script with do; Stata stops on the first error unless told otherwise\nrun_all.py calling each step with subprocess.run(..., check=True), or a Makefile\n\n\nFixed package versions\nrenv lockfile\nShip the user-written commands in the repository and point sysdir set PLUS at them; set version at the top of the master file\nA pinned lockfile (requirements.txt with exact versions, or uv.lock)\n\n\nSeeds and the generator\nset.seed(); RNGkind(sample.kind = \"Rounding\") to reproduce pre-3.6 draws\nset seed; the generator depends on version (version 13 and earlier give the old KISS generator, later versions Mersenne Twister); set sortseed for ties\nnumpy.random.default_rng(seed), passed explicitly; the legacy np.random.seed() and the standard library’s random keep separate global states\n\n\nRobust standard errors\nestimatr::lm_robust(), HC2 by default\nvce(robust) is HC1; vce(hc2) and vce(hc3) exist for regress; vce(cluster) is CR1\nstatsmodels cov_type=\"HC2\" (or HC1, HC3); cov_type=\"cluster\" for clustering\n\n\nUnrounded table output\nwrite_csv() of the estimates beside the formatted table\nexport delimited or putexcel from stored results, beside the esttab or collect table\nDataFrame.to_csv() beside to_latex()\n\n\nA CSV beside every figure\nwrite_csv() of the plotted values next to ggsave()\nexport delimited of the plotted variables next to graph export\nto_csv() of the plotted values next to savefig()\n\n\nDeterministic figure files\nBlank the PDF CreationDate and ModDate after writing\nCheck whether graph export embeds a date; if it does, compare the CSVs only\nsavefig(..., metadata={\"CreationDate\": None}) for PDF\n\n\nDownloads verified by checksum\ndownload_original.R: curl then tools::md5sum()\ncopy the file, then shell out to a checksum tool; Stata’s own checksum is a CRC, not MD5\nrequests and hashlib.md5() / hashlib.sha256()\n\n\nPrinted values read as text\nread_csv(col_types = cols(value_paper = col_character()))\nimport delimited, stringcols(_all)\npd.read_csv(..., dtype=str, keep_default_na=False)\n\n\nA number at the printed precision\nsprintf(\"%.2f\", x)\nstring(x, \"%9.2f\") (then trim)\nf\"{x:.2f}\"\n\n\nThe claims check\nexcheckr\nNot yet written\nNot yet written\n\n\n\nTwo cautions about the table.\nDefault standard errors differ across languages. Stata’s robust is HC1, estimatr’s default is HC2, and statsmodels makes you choose. A rewrite in a different language from the original, or a port between packages in the same language, can move every standard error in a paper without anything being wrong in the code. The rewrite keeps the paper’s estimator (Stage 3), which includes its variance estimator.\nUse the formatting function, not a rounding function. Rounding functions differ on exact halves across languages (and some round half to even), while a format string applied to the full-precision value is what produces the digits the comparison needs. Whatever you use, test it on values that sit on a rounding boundary.",
+    "crumbs": [
+      "All maintained papers",
+      "Languages other than R"
+    ]
+  },
+  {
+    "objectID": "languages.html#the-claims-check",
+    "href": "languages.html#the-claims-check",
+    "title": "Languages other than R",
+    "section": "The claims check",
+    "text": "The claims check\nStage 4 describes the verdicts. Rewriting the check in another language means reproducing this behaviour; excheckr is one implementation of it, not the definition.\nFor each claim in published_claims.csv with needs_block = TRUE, a block in the claims script computes a value from the rewrite’s output and declares it with the claim’s id and, where the claim needs one, an expectation (range, derived, shape, or absent). The check looks up the claim’s printed value and precision in the extraction, and the corrected value from any errata entry whose claim_ids name it. It formats the computed value at the printed precision, normalizing a negative zero, and then takes the first verdict that applies:\n\nThe block produced no value: absent if it declared absent, otherwise MISSING. (A block that declares absent and then produces a value is an error in the script, not a verdict.)\nThe block declared range, derived, or shape: that verdict. The declaration is the block’s own statement that it has tested the condition, so the block’s code must do the testing.\nThe claim has no printed value: shape.\nAn erratum corrects the claim: STALE if the computed value agrees with the printed value (the pipeline reproduces what the erratum says is wrong), DRIFT if it agrees with neither the printed nor the corrected value, and corrected if it agrees with the corrected value.\nThe computed value agrees with the printed value at the printed precision: match.\nThe claim’s type is descriptive: hedged.\nOtherwise: MISMATCH.\n\nEach claim prints one line: CLAIM &lt;claim_id&gt; = &lt;computed value&gt; || [verdict] &lt;label&gt;. At the end the check prints a summary counting each verdict and stops with an error on any MISMATCH, STALE, DRIFT, or MISSING. Two counts are checked separately: the claims printed must be exactly the claims with needs_block = TRUE, and every claim that a quantity erratum names must score corrected.\nexcheckr also has an optional band for values from simulations: a failing value within a stated distance of its target scores MEDIUM and passes. Whether to carry that over depends on how your rewrite handles the cases in rules/stochastic.md.",
+    "crumbs": [
+      "All maintained papers",
+      "Languages other than R"
+    ]
+  },
+  {
+    "objectID": "languages.html#traps-specific-to-stata-and-python",
+    "href": "languages.html#traps-specific-to-stata-and-python",
+    "title": "Languages other than R",
+    "section": "Traps specific to Stata and Python",
+    "text": "Traps specific to Stata and Python\nThese are well-known hazards of each language rather than things we hit ourselves; they belong in traps.md once someone has met them in practice.\nStata\n\nsort is not stable: observations with tied keys come out in an order that depends on the sort seed. Code that relies on the order of ties (taking the first observation in a group, say) can give different answers from run to run. Use sort, stable or break the ties.\nA missing numeric value is larger than every number, so if x &gt; 5 includes missing values.\ngenerate creates a 4-byte float by default, so x == 0.1 can be false for a variable assigned 0.1. Use double (or set type double) for anything compared or reported.\nmerge m:m does not do what its name suggests; it pairs observations by order within groups. Use joinby for a many-to-many join, and check _merge after every merge.\nversion changes behaviour well beyond the random-number generator. Set it once in the master file to the version the paper used for the archive check, and to the current version for the rewrite.\n\nPython\n\npandas guesses column types on read, which turns “0.80” into 0.8 and can turn an identifier like “007” into 7. Read anything printed as text.\ngroupby drops groups whose key is missing unless told otherwise (dropna=False), and sorts groups by default.\nstatsmodels’ array interface (sm.OLS(y, X)) does not add an intercept, while its formula interface does.\nLibrary defaults change between versions more often than in R or Stata. Pin every version, and expect dispatch drift of the kind described in traps.md.",
+    "crumbs": [
+      "All maintained papers",
+      "Languages other than R"
+    ]
+  },
+  {
+    "objectID": "rules/rounding.html",
+    "href": "rules/rounding.html",
+    "title": "Rounding",
+    "section": "",
+    "text": "The rule in one sentence: a computed value matches a printed one when, formatted to the precision the page prints, it gives the same digits. Everything below is about applying that rule without fooling yourself in either direction.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Rounding"
+    ]
+  },
+  {
+    "objectID": "rules/rounding.html#keep-the-printed-value-as-a-string",
+    "href": "rules/rounding.html#keep-the-printed-value-as-a-string",
+    "title": "Rounding",
+    "section": "Keep the printed value as a string",
+    "text": "Keep the printed value as a string\nA printed number carries its precision in its digits. “0.80” says two decimal places, “0.8” says one, and as floating-point numbers the two are identical. Once a printed value has been read in as a number, the comparison at printed precision can no longer be made, because the precision is gone.\nWe therefore stored every printed value as the string the page prints, in the extraction and in the committed ground truth, and compared strings: the computed value is formatted with the printed number of decimals (sprintf(\"%.2f\", x) in R), and the two strings are compared after the clean-up below. A comparison by numeric tolerance fails in both directions. Too loose a tolerance passed a value that the row’s own note said disagreed; values sitting exactly on a rounding boundary were reported as mismatches when they were not.\nThe string is easy to lose by accident. A CSV reader that guesses column types will read a column of numeric-looking strings as numbers, turning “0.020” into 0.02 and “-0.00” into 0. We forced the column type to character everywhere the printed value is read, and checked that the file on disk still stores the string, since a script can carry the string internally and then write a number at the end.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Rounding"
+    ]
+  },
+  {
+    "objectID": "rules/rounding.html#clean-up-before-comparing",
+    "href": "rules/rounding.html#clean-up-before-comparing",
+    "title": "Rounding",
+    "section": "Clean-up before comparing",
+    "text": "Clean-up before comparing\nBoth sides get the same treatment:\n\nrestore a missing leading zero (“.23” becomes “0.23”);\nreplace a typographic minus sign with a hyphen;\nremove thousands separators;\ntreat a negative zero as zero.\n\nA tolerance of 1e-9 absorbs floating-point representation, and nothing else.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Rounding"
+    ]
+  },
+  {
+    "objectID": "rules/rounding.html#rounding-errors-are-errors",
+    "href": "rules/rounding.html#rounding-errors-are-errors",
+    "title": "Rounding",
+    "section": "Rounding errors are errors",
+    "text": "Rounding errors are errors\nA value rounded the wrong way at the printed precision is an erratum. The text that prints 0.23 for a value of 0.2230 is wrong at the precision it chose, and so is a value truncated rather than rounded (0.699 printed for 0.6996). These errata are small, and most of them are hand-typed numbers in the body text, where nothing generated them from the code.\nThe computed side must be compared at full precision. If the rewrite stores a value already rounded (an R-squared kept as 0.0115) and that value is rounded again for comparison, the result can disagree with the page (0.011 against a printed 0.012) when the full-precision value (0.01150090) agrees. Every table in the rewrite is written unrounded beside its formatted version for this reason.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Rounding"
+    ]
+  },
+  {
+    "objectID": "rules/rounding.html#hedged-numbers",
+    "href": "rules/rounding.html#hedged-numbers",
+    "title": "Rounding",
+    "section": "Hedged numbers",
+    "text": "Hedged numbers\nWhen the sentence itself hedges, we compared within half a step of the sentence’s own precision. We treated the following words as hedges: “approximately”, “about”, “roughly”, “around”, “nearly”, “close to”, “on the order of”.\n\n“about 37” tolerates 36.5 to 37.5;\n“about 40 percent” tolerates 35 to 45 percent.\n\nA hedge needs that bound. Our first version of the rule simply returned no verdict for a hedged number, and it hid one paper’s largest error: an appendix said one effect was “about 37 percentage points” when the estimate was 29.7, and the hedge exempted it from every check. A hedge excuses a rounding difference, not an arbitrary one.\nThe hedge has to be on the page. A sentence that states a bare figure or a bare interval asserts it exactly, and the fact that the true value is close is not a defence. An effect described as running “between 0.30 and 0.50 standard deviations”, about estimates of 0.283 and 0.522, is an erratum, even though both estimates round to the endpoints at one decimal place.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Rounding"
+    ]
+  },
+  {
+    "objectID": "rules/rounding.html#differences-of-printed-cells",
+    "href": "rules/rounding.html#differences-of-printed-cells",
+    "title": "Rounding",
+    "section": "Differences of printed cells",
+    "text": "Differences of printed cells\nWhen the text reports a difference between two printed values, each value was rounded on its own, so the difference can legitimately be off by one unit in the last printed digit. We allowed exactly that, with the tolerance set slightly wider than one unit so that it never sits on a floating-point boundary. Without that margin, a gap of exactly one unit can fail: 0.8 minus 0.7 computes as 0.10000000000000009, which is not at most 0.1.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Rounding"
+    ]
+  },
+  {
+    "objectID": "rules/rounding.html#the-archives-precision",
+    "href": "rules/rounding.html#the-archives-precision",
+    "title": "Rounding",
+    "section": "The archive’s precision",
+    "text": "The archive’s precision\nThe deposited code often prints its own output at a fixed precision (a tibble shows three significant digits, a Stata log a few decimals). The archive’s value is compared at the coarser of the page’s precision and the precision the deposited code printed. Any finer comparison manufactures disagreement between two numbers that agree as far as either was ever printed.\nSometimes rounding twice is the deposit’s own convention: a table that rounds to three places and then formats to two prints 0.55 for a rate of 0.5449. The rewrite declines to round twice and computes 0.54, while the archive reproduces the page exactly. We recorded both values and explained in the notes which was which, so that the rewrite’s choice did not read as a failure to reproduce.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Rounding"
+    ]
+  },
+  {
+    "objectID": "rules/stochastic.html",
+    "href": "rules/stochastic.html",
+    "title": "Numbers that come from random draws",
+    "section": "",
+    "text": "Bootstrap intervals, randomization-inference p-values, simulated power, permutation tests, and anything else built on random draws can print a different number on every run. A difference between such a number and the page is not, by itself, evidence of an error. It is not evidence of no error either, and the rule below exists to keep the second mistake from hiding behind the first.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Numbers that come from random draws"
+    ]
+  },
+  {
+    "objectID": "rules/stochastic.html#first-confirm-that-something-draws",
+    "href": "rules/stochastic.html#first-confirm-that-something-draws",
+    "title": "Numbers that come from random draws",
+    "section": "First, confirm that something draws",
+    "text": "First, confirm that something draws\nBefore putting a difference down to randomness, we checked that the procedure actually draws at random. A set.seed() call at the top of a script is not evidence of that. One paper set a seed twice and never drew a random number; its results were identical at any seed. An earlier pass had explained a real mismatch in that paper as bootstrap noise from a function that, on inspection, uses the jackknife, which is deterministic. More than once, a difference that looked like noise was a bug.\nThe check is cheap: run the procedure at two or three very different seeds. If nothing moves, nothing draws, and the difference needs another explanation.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Numbers that come from random draws"
+    ]
+  },
+  {
+    "objectID": "rules/stochastic.html#seeded-procedures",
+    "href": "rules/stochastic.html#seeded-procedures",
+    "title": "Numbers that come from random draws",
+    "section": "Seeded procedures",
+    "text": "Seeded procedures\nWhen the deposited code sets a seed, the archive check in Stage 1 tries to reproduce the printed value exactly, under the software of the paper’s day. For R, the date that matters most is April 2019: R 3.6.0 changed the default algorithm behind sample(), so code that draws with sample() and was run before then needs RNGkind(sample.kind = \"Rounding\") to reproduce its own output. We tested the old sampler before concluding that a seeded archive was broken, and it often turned out not to be.\nThe maintained rewrite keeps the current sampler, because it is the code we would write now. Where the current sampler moves a published number, the ground truth records defect_locus = environment. Neither the paper nor the archive is wrong; the software changed underneath them.\nTwo practical notes. Setting the sampler inside a script and expecting on.exit() to restore it does not work reliably when scripts are sourced in sequence from run_all.R, so we restored it explicitly and asserted the result. A published number should also be checked under the conditions of the document that printed it: a corrigendum published years after the article may have been computed with different software, or different inputs, from the article it corrects.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Numbers that come from random draws"
+    ]
+  },
+  {
+    "objectID": "rules/stochastic.html#unseeded-procedures",
+    "href": "rules/stochastic.html#unseeded-procedures",
+    "title": "Numbers that come from random draws",
+    "section": "Unseeded procedures",
+    "text": "Unseeded procedures\nWhen the deposited code sets no seed, the printed value is a single unlabelled draw, and no run can be expected to match it. We reran the procedure across many seeds (a few hundred was usually enough) and asked whether the printed value was consistent with the resulting distribution. Two illustrations:\n\nA chi-squared p-value ran from 0.0005 to 0.004 over 500 replications, and about a quarter of the draws rounded to the printed value. The printed value holds.\nThe endpoints of a simulated interval were printed as $1.70 and $13.71. Over 200 seeds the endpoints ranged from $1.66 to $1.73 and from $11.79 to $15.19. Both printed values hold.\n\nA printed value far outside any reasonable draw is an erratum. A printed value inside the distribution is not, even when no single run reproduces it.\nIn the ground truth, such a row leaves match_rewrite empty, since there is no single value to match, and records the verdict in holds. Filling in match_rewrite = TRUE beside a value_rewrite that visibly differs would make the row contradict itself. The same encoding applies whatever the claim type: a pipeline claim whose printed value comes from an unseeded procedure needs it just as much as a descriptive one.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Numbers that come from random draws"
+    ]
+  },
+  {
+    "objectID": "rules/stochastic.html#unseeded-figures",
+    "href": "rules/stochastic.html#unseeded-figures",
+    "title": "Numbers that come from random draws",
+    "section": "Unseeded figures",
+    "text": "Unseeded figures\nThe same problem arises in figures, where it is easier to miss. A figure whose layout depends on random draws (a jittered scatter, simulated intervals, labels placed by a stochastic algorithm) can change with every run. In one paper with no seed, 9 of 20 seeds moved at least one published label. The archive runs without error and still cannot reproduce its own figure, even in principle. Where we found this, we measured how much the figure moved at the printed precision and reported it, rather than calling the figure reproduced or not.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Numbers that come from random draws"
+    ]
+  },
+  {
+    "objectID": "rules/stochastic.html#in-the-errata",
+    "href": "rules/stochastic.html#in-the-errata",
+    "title": "Numbers that come from random draws",
+    "section": "In the errata",
+    "text": "In the errata\nA value inside the distribution is not an erratum and does not appear in the note. Where such a row carries a locus anyway (a seeded value that the current sampler moves, say, but only within the range over seeds), its disposition is documented_only, with the range as the reason. A value far outside the distribution is an ordinary erratum, and its corrected value is computed from the rewrite in the usual way, with the seed recorded so that the correction itself reproduces.",
+    "crumbs": [
+      "All maintained papers",
+      "Rules",
+      "Numbers that come from random draws"
+    ]
+  },
+  {
+    "objectID": "schemas/archive_run_status.html",
+    "href": "schemas/archive_run_status.html",
+    "title": "ground_truth/archive_run_status.csv",
+    "section": "",
+    "text": "One row per deposited script per pass: what happened when we ran the archive (Stage 1).\npass, script, role, exit_status, outcome, stopped_at",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Archive run"
+    ]
+  },
+  {
+    "objectID": "schemas/archive_run_status.html#allowed-values",
+    "href": "schemas/archive_run_status.html#allowed-values",
+    "title": "ground_truth/archive_run_status.csv",
+    "section": "Allowed values",
+    "text": "Allowed values\npass\n\n\n\n\n\n\n\nValue\nMeaning\n\n\n\n\nas_shipped\nThe deposit exactly as downloaded, intermediate files and all.\n\n\nstripped\nOnly the raw data and the code, with every intermediate file the deposit shipped removed, so that each script has to rebuild what it reads.\n\n\n\nThe table is long: a script run in both passes has two rows.\nrole\n\n\n\nValue\nMeaning\n\n\n\n\ncleaning\nTurns raw data into analysis data.\n\n\nanalysis\nProduces tables, figures, or reported numbers.\n\n\nother\nAnything else the deposit runs directly.\n\n\n\nA helper file that is only ever sourced by other scripts gets no row, since it never runs on its own.\noutcome\n\n\n\n\n\n\n\nValue\nMeaning\n\n\n\n\nclean\nRan to the end without error.\n\n\nerror\nStopped with an error.\n\n\ntimeout\nDid not finish in the time allowed.\n\n\nnot_run\nNot run, for a reason given in stopped_at (it needs Stata, say, or a proprietary dataset).",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Archive run"
+    ]
+  },
+  {
+    "objectID": "schemas/archive_run_status.html#what-this-table-does-not-say",
+    "href": "schemas/archive_run_status.html#what-this-table-does-not-say",
+    "title": "ground_truth/archive_run_status.csv",
+    "section": "What this table does not say",
+    "text": "What this table does not say\nclean means the script ran. Whether it reproduced the paper’s numbers is a separate question, answered by the ground truth. A script can run cleanly and reproduce nothing, and a script that errors halfway through can still have printed the numbers we needed. The table answers the first question only.\nA deposit we could not run at all still writes this table, with one not_run row per script.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Archive run"
+    ]
+  },
+  {
+    "objectID": "schemas/float_coverage.html",
+    "href": "schemas/float_coverage.html",
+    "title": "ground_truth/float_coverage.csv",
+    "section": "",
+    "text": "One row per table and figure in the article and appendix, saying how much of each the ground truth actually checks (Stage 2). We added it after a coverage check that asked only whether each float had at least one row passed for months on a figure with one checked value out of more than a hundred printed.\nfloat, published_numbers, covered, reproduced_by_rewrite, reproduced_by_archive, plotted, plotted_reproduced, note",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Float coverage"
+    ]
+  },
+  {
+    "objectID": "schemas/float_coverage.html#rules",
+    "href": "schemas/float_coverage.html#rules",
+    "title": "ground_truth/float_coverage.csv",
+    "section": "Rules",
+    "text": "Rules\n\nThe list of floats comes from the article, not from the scripts. An article’s own front matter or numbering says what it contains, and the table is checked against that list, so a float with no script still gets a row.\nA figure that prints no numbers is not thereby covered. Its published_numbers is 0, and what it plots is the claim, so plotted and plotted_reproduced carry the check. A figure is never passed just because it prints no numbers.\nSome figures cannot be counted. A figure with too many points to count records what the rewrite plots and says so in note; a continuous surface records that it has no discrete points. A diagram that carries no data gets zero counts and a note.\nEvery count is computed. A typed count once sat a few lines below the code that should have produced it, and claimed eleven covered values where there were three.\nThe README states each fraction. Computing coverage inside a check that only stops the build leaves a reader with nothing; the report reads this table and prints it.\n\nA paper with no tables or figures writes this table with a header and no rows.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Float coverage"
+    ]
+  },
+  {
+    "objectID": "schemas/original_manifest.html",
+    "href": "schemas/original_manifest.html",
+    "title": "original_manifest.csv",
+    "section": "",
+    "text": "One row per file in the replication deposit. The manifest is the repository’s record of what the deposit held, and download_original.R checks every download against it (Stage 1). We built each manifest from the archive’s API rather than by hand.\nThe columns differ by archive, because the archives publish different things about each file.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Deposit manifest"
+    ]
+  },
+  {
+    "objectID": "schemas/original_manifest.html#dataverse",
+    "href": "schemas/original_manifest.html#dataverse",
+    "title": "original_manifest.csv",
+    "section": "Dataverse",
+    "text": "Dataverse\nfile, directory_label, dataverse_file_id, file_persistent_id, bytes, md5_served, md5_published, unf, served_as\n\n\n\n\n\n\n\n\nColumn\nType\nMeaning\n\n\n\n\nfile\ntext\nThe file’s original name, as the authors uploaded it.\n\n\ndirectory_label\ntext\nThe folder the file sits in within the deposit; empty for a file at the top level.\n\n\ndataverse_file_id\ninteger\nDataverse’s numeric file id, used to download it.\n\n\nfile_persistent_id\ntext\nThe file’s own DOI, where the installation assigns one; empty otherwise.\n\n\nbytes\ninteger\nSize of the original file in bytes.\n\n\nmd5_served\ntext\nMD5 of the bytes the download actually returns.\n\n\nmd5_published\ntext\nMD5 that Dataverse publishes in the file’s metadata.\n\n\nunf\ntext\nDataverse’s Universal Numerical Fingerprint, for tabular files it has ingested; empty otherwise.\n\n\nserved_as\ntext\nThe file name the download returns.\n\n\n\nmd5_served and md5_published usually agree. They part when Dataverse has ingested a tabular upload (a .dta or .csv, say) and serves its own .tab version by default: the published checksum describes the original upload and the served bytes are the conversion. We downloaded with ?format=original so that the original is what arrives, and recorded both checksums so that a disagreement is visible rather than silent.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Deposit manifest"
+    ]
+  },
+  {
+    "objectID": "schemas/original_manifest.html#osf",
+    "href": "schemas/original_manifest.html#osf",
+    "title": "original_manifest.csv",
+    "section": "OSF",
+    "text": "OSF\nfile, directory_label, osf_file_id, bytes, md5_served, md5_published, sha256_published\n\n\n\n\n\n\n\n\nColumn\nType\nMeaning\n\n\n\n\nfile\ntext\nThe file’s name.\n\n\ndirectory_label\ntext\nThe folder within the OSF storage; empty at the top level.\n\n\nosf_file_id\ntext\nOSF’s id for the file.\n\n\nbytes\ninteger\nSize in bytes.\n\n\nmd5_served\ntext\nMD5 of the bytes the download returns.\n\n\nmd5_published\ntext\nMD5 that OSF publishes for the file.\n\n\nsha256_published\ntext\nSHA-256 that OSF publishes for the file.\n\n\n\nOSF stores one set of bytes and publishes two checksums of it, with no converted version, so the served-versus-published problem above cannot arise.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Deposit manifest"
+    ]
+  },
+  {
+    "objectID": "schemas/original_manifest.html#other-archives",
+    "href": "schemas/original_manifest.html#other-archives",
+    "title": "original_manifest.csv",
+    "section": "Other archives",
+    "text": "Other archives\nThe rule that carries over: record every checksum the archive publishes, record the byte size, and have the download stop on any disagreement with an independent claim about the bytes.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Deposit manifest"
+    ]
+  },
+  {
+    "objectID": "schemas/original_manifest.html#checks",
+    "href": "schemas/original_manifest.html#checks",
+    "title": "original_manifest.csv",
+    "section": "Checks",
+    "text": "Checks\nThe download stops if a file’s size or served checksum differs from the manifest, or if original/ contains a file the manifest does not list (hidden files included). A disagreement with the published checksum is printed without stopping. Zip and RAR files are unpacked into their own folders and checked against a second manifest of their contents.",
+    "crumbs": [
+      "All maintained papers",
+      "Schemas",
+      "Deposit manifest"
+    ]
+  },
+  {
+    "objectID": "stages/00_setup.html",
+    "href": "stages/00_setup.html",
+    "title": "Stage 0: Setup and style",
+    "section": "",
+    "text": "Before writing any code, we gathered everything that might help answer a question about the paper, set up the repository, and wrote down how we wanted the new code to look.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 0: Setup and style"
+    ]
+  },
+  {
+    "objectID": "stages/00_setup.html#the-published-record",
+    "href": "stages/00_setup.html#the-published-record",
+    "title": "Stage 0: Setup and style",
+    "section": "The published record",
+    "text": "The published record\nWe worked from the publisher’s rendered PDFs: the article itself (the version of record), the online appendix, and any corrigendum already published. A published corrigendum is an analysis too, and we checked it against its own materials like everything else.\nWe learned to avoid preprints and accepted manuscripts as sources for published values. They often differ from the final article in small ways (a number updated in proofs, a table reordered, a sentence reworded), and comparing against the wrong version produced errata that weren’t real.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 0: Setup and style"
+    ]
+  },
+  {
+    "objectID": "stages/00_setup.html#the-deposit",
+    "href": "stages/00_setup.html#the-deposit",
+    "title": "Stage 0: Setup and style",
+    "section": "The deposit",
+    "text": "The deposit\nNext we found the replication deposit (ours were on Dataverse and OSF) and recorded its DOI. We left the data where they were. Stage 1 writes a script that downloads the deposit and checks each file against a manifest, so the journal’s archive stays the single source for the data.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 0: Setup and style"
+    ]
+  },
+  {
+    "objectID": "stages/00_setup.html#materials-outside-the-deposit",
+    "href": "stages/00_setup.html#materials-outside-the-deposit",
+    "title": "Stage 0: Setup and style",
+    "section": "Materials outside the deposit",
+    "text": "Materials outside the deposit\nSome of the most useful evidence was not in the deposit at all. Depending on the paper, we had:\n\nthe final production files sent to the publisher (.tex or .docx);\nthe proofs, with our marked-up corrections;\nthe accepted manuscript;\nolder scripts and intermediate files from our working folders.\n\nNone of these fed into the rewrite. What they did was settle questions the deposit couldn’t. When the text printed a wrong number, was it a typo, or a number left over from an earlier run? Did an error enter during typesetting, or was it already in our manuscript? What did the code look like when we wrote the paper? When one of these files settled a question, the erratum records it as its source (authors_archive or proof; see the errata schema).\nTwo lessons from using them. A .tex file from a working folder can be a draft from before copyediting; we treated one as the published text only when its compiled PDF matched the publisher’s byte for byte. And because files that were never public can’t be checked by a reader, we used them to explain errors, and kept each correction itself grounded in the published article and the deposited data.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 0: Setup and style"
+    ]
+  },
+  {
+    "objectID": "stages/00_setup.html#the-repository",
+    "href": "stages/00_setup.html#the-repository",
+    "title": "Stage 0: Setup and style",
+    "section": "The repository",
+    "text": "The repository\nEach repository has:\n\na single entry point (run_all.R for us; a master .do file or a Python script would do the same job) that runs everything in order and stops at the first failure;\npaths relative to the repository root (we used the here package), so the code runs on anyone’s machine;\na .gitignore that keeps the downloaded deposit out of version control;\na license. We used CC0 for the code and did not redistribute the data.\n\nOur folder layout:\nrun_all.R\ndownload_original.R\noriginal_manifest.csv\nSTYLE.md\nmaintained/            # the rewrite, one script per table or figure\nmaintained/output/     # everything the rewrite writes\nground_truth/          # the comparison tables and the scripts that build them\nerrata.qmd\nREADME.qmd",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 0: Setup and style"
+    ]
+  },
+  {
+    "objectID": "stages/00_setup.html#style-investigation",
+    "href": "stages/00_setup.html#style-investigation",
+    "title": "Stage 0: Setup and style",
+    "section": "Style investigation",
+    "text": "Style investigation\nA rewrite is code that you and others will be reading for years, so it should look like code you’d write today. My own habits have changed a lot since graduate school, and the rewrite was a chance to bring old projects up to how I work now. An agent can’t know what that means without reading some of your code, so we made the question an explicit step.\n\nGather some recent code that you’re happy with, ideally from more than one project.\nHave the agent draft a STYLE.md from what it reads. Ours covered, with examples drawn from the code itself:\n\nhow scripts are organized (one per table or figure, cleaning separate from analysis, a shared helpers file, a short header comment);\nnaming of files, objects, and columns;\nhow data get reshaped, joined, and recoded;\nmodeling defaults (estimators, standard errors, packages);\nfigures (theme, how intervals are drawn, file formats, and a CSV of the plotted values saved next to each figure);\ntables;\nanything to avoid.\n\nRead the draft, fix it, and approve it. The draft gets some things wrong, and fixing those turned out to be where most of the value was. The approved file is committed, and the rewrite follows it.\n\nSTYLE.md covers how the code looks. A few things about what the rewrite does stay the same whatever your style:\n\nit reproduces every number, table, and figure the paper prints, or documents why it can’t;\nit runs on current versions of every package;\nit reads the data exactly as deposited;\nit keeps the paper’s original estimator, specification, sample, and seed, even where you’d now choose differently (a choice you would make differently today isn’t an error; see what counts as an erratum);\nit never uses a published number as an input.\n\nWhen a style preference and one of these conflict, the paper’s choices win. The case we hit most often: my current default standard errors differ from what some of the older papers used, and the rewrites kept the originals.\nThere’s an example STYLE.md from our collection in examples/STYLE_example.md. It is one person’s taste, and is there to show the level of detail that worked for us.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 0: Setup and style"
+    ]
+  },
+  {
+    "objectID": "stages/00_setup.html#done-when",
+    "href": "stages/00_setup.html#done-when",
+    "title": "Stage 0: Setup and style",
+    "section": "Done when",
+    "text": "Done when\nThe repository exists with its entry point and layout, the published PDFs are in hand, the deposit DOI is recorded, and an approved STYLE.md is committed.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 0: Setup and style"
+    ]
+  },
+  {
+    "objectID": "stages/02_ground_truth.html",
+    "href": "stages/02_ground_truth.html",
+    "title": "Stage 2: Ground truth",
+    "section": "",
+    "text": "The ground truth is one table, built by a script, that lists every number the paper prints and compares each with the value the original code produces and the value the maintained rewrite produces. Every erratum about a number traces back to a row in it, and every claim that the rewrite reproduces the paper rests on it.\nWe settled on two principles for it, both learned the hard way.\nStart from the article. We list what the paper prints first, and only then join that list to what the pipeline computes. Our earliest attempts went the other way, starting from the code’s output, and they were blind to any number the code never computed. Those turned out to be some of the most error-prone numbers of all: values typed into the text by hand, or left over from an earlier draft.\nGenerate it rather than type it. The only values in the table that a person types are the printed ones, transcribed from the published page. The archive’s values come from running the deposited code, the rewrite’s values are read from its output files, and the verdicts are computed. In one early repository, the comparison values had been typed in by hand too, and every row “matched”, which meant the table couldn’t have detected a problem if there had been one.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 2: Ground truth"
+    ]
+  },
+  {
+    "objectID": "stages/02_ground_truth.html#the-table",
+    "href": "stages/02_ground_truth.html#the-table",
+    "title": "Stage 2: Ground truth",
+    "section": "The table",
+    "text": "The table\nground_truth/&lt;paper_id&gt;_ground_truth.csv is written by ground_truth/build_ground_truth.R, which run_all.R runs last:\npaper_id, claim_id, location, claim_type, claim, value_paper, digits, value_script, match, value_rewrite, match_rewrite, holds, defect_locus, disposition, disposition_reason, notes\n\nlocation says where the number is printed: a table or figure, a page and paragraph, a footnote, or an appendix section.\nvalue_paper is the number exactly as printed, stored as text. Reading it as a number throws information away: 0.80 becomes 0.8, -0.00 becomes 0, and the printed precision, which is part of what the paper claims, is lost. We had this happen in several repositories before we started forcing the column to be read as text everywhere.\ndigits is the precision the page prints, recorded for each row.\nvalue_script comes from running the deposited code in Stage 1, and is left empty where the archive couldn’t be run.\nvalue_rewrite is read from the rewrite’s output at full precision.\nmatch, match_rewrite, and holds take the values TRUE, FALSE, or empty.\n\nThe full definitions are in schemas/ground_truth.md.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 2: Ground truth"
+    ]
+  },
+  {
+    "objectID": "stages/02_ground_truth.html#when-two-numbers-match",
+    "href": "stages/02_ground_truth.html#when-two-numbers-match",
+    "title": "Stage 2: Ground truth",
+    "section": "When two numbers match",
+    "text": "When two numbers match\nA computed value matches a printed one when, rounded to the precision the page prints, it gives the same digits. Before comparing, both sides get the same clean-up: a missing leading zero restored, a typographic minus sign replaced, thousands separators removed, and a negative zero treated as zero. A tiny tolerance (1e-9) absorbs floating-point representation, and nothing else.\nThree refinements came up often enough to write down:\n\nHedged numbers. When the text itself hedges (“about 40 percent”, “roughly”, “nearly”, “on the order of”), we compared within half a step of the sentence’s own precision. When the text states an approximate number without a hedge, we held it to its printed digits: a sentence that says 40 percent about a value of 38 percent is an error.\nDifferences of printed values. When the text reports a difference between two printed cells, we allowed one unit in the last digit, since each cell was rounded separately.\nThe archive’s precision. We compared the archive’s value at the coarser of the page’s precision and the precision at which the deposited code itself prints.\n\nMore detail and examples are in rules/rounding.md.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 2: Ground truth"
+    ]
+  },
+  {
+    "objectID": "stages/02_ground_truth.html#numbers-that-come-from-random-draws",
+    "href": "stages/02_ground_truth.html#numbers-that-come-from-random-draws",
+    "title": "Stage 2: Ground truth",
+    "section": "Numbers that come from random draws",
+    "text": "Numbers that come from random draws\nBootstrap intervals, randomization-inference p-values, simulated power, and anything else based on random draws can differ from run to run, and between software versions even with the same seed. Before putting a difference down to randomness, we checked that the procedure actually draws at random; more than once, a difference that looked like noise was a deterministic bug. For a value the paper reports without a seed, we compared it with the distribution of that value over many seeds, left match_rewrite empty, and recorded in holds whether the printed value was consistent with that distribution. A printed value far outside any reasonable draw counts as an error; one inside the range doesn’t. See rules/stochastic.md.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 2: Ground truth"
+    ]
+  },
+  {
+    "objectID": "stages/02_ground_truth.html#where-the-problem-is-defect_locus",
+    "href": "stages/02_ground_truth.html#where-the-problem-is-defect_locus",
+    "title": "Stage 2: Ground truth",
+    "section": "Where the problem is: defect_locus",
+    "text": "Where the problem is: defect_locus\nEach row where a comparison fails (match, match_rewrite, or holds is FALSE) records where the problem lies:\n\n\n\n\n\n\n\ndefect_locus\nMeaning\n\n\n\n\npaper_internal\nThe printed text is wrong: the code produces one number and the page prints another (a typo, a stale number, a rounding slip, a transposed cell).\n\n\narchive\nThe deposited code is wrong: it produces a number that a corrected computation doesn’t, and the page printed what the code produced.\n\n\nenvironment\nThe software changed: the deposited code, run today, gives a different number than it did then.\n\n\nrewrite\nThe maintained rewrite is wrong. We fixed these, so none should remain at the end.\n\n\nupstream\nThe problem is in something the paper relied on, such as a dataset or an estimate it reused.\n\n\nunresolved\nWe looked, and couldn’t tell.\n\n\n\nThe rule cuts both ways: a failing row gets a locus, and a row where everything matches doesn’t. A row with no verdict, such as an unseeded value, may or may not.\nOne case is easy to miss. Sometimes the page, the archive, and the rewrite all agree, yet the number is wrong, because the deposited code has a bug and the rewrite faithfully reproduced it before the bug was found. Every comparison “matches”, and the paper is still in error. We record those rows with the locus archive, and only when an erratum names them.\nWe set the locus where each row is built, rather than as a default for the whole table, and put any second contributing cause in notes.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 2: Ground truth"
+    ]
+  },
+  {
+    "objectID": "stages/02_ground_truth.html#what-was-done-about-it-disposition",
+    "href": "stages/02_ground_truth.html#what-was-done-about-it-disposition",
+    "title": "Stage 2: Ground truth",
+    "section": "What was done about it: disposition",
+    "text": "What was done about it: disposition\nEach row with a defect also records what happened to it:\n\n\n\n\n\n\n\ndisposition\nMeaning\n\n\n\n\ncorrected_here\nAn entry in this repository’s errata corrects it. This one is computed from the errata, never entered by hand.\n\n\ncorrected_by_journal\nA published corrigendum or erratum corrects it.\n\n\ndocumented_only\nRecorded here and deliberately not corrected (a value within simulation noise, for example).\n\n\nnot_corrected\nKnown, and left uncorrected for a stated reason.\n\n\nempty\nNobody has decided yet.\n\n\n\nThe three judgment values come with a disposition_reason. The build stops if any paper_internal row has no disposition, since an error in the printed text that nobody has decided about is unfinished business.\nThe dispositions line up with the choice an author faces for each error: fix it in your own errata, send it to the journal, or record it and move on. rules/severity.md describes how we made that choice.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 2: Ground truth"
+    ]
+  },
+  {
+    "objectID": "stages/02_ground_truth.html#coverage",
+    "href": "stages/02_ground_truth.html#coverage",
+    "title": "Stage 2: Ground truth",
+    "section": "Coverage",
+    "text": "Coverage\nOur first coverage check asked only whether every table had at least one row in the ground truth, and it passed while missing most of the numbers on some tables. We now report coverage table by table and figure by figure, as a fraction, in ground_truth/float_coverage.csv:\nfloat, published_numbers, covered, reproduced_by_rewrite, reproduced_by_archive, plotted, plotted_reproduced, note\n\nThe list of tables and figures comes from the article itself, and we checked it in both directions: every table and figure in the article has a row, and every row names one that the article contains.\npublished_numbers counts the numbers printed on each table or figure, and covered counts how many of them have a row in the ground truth.\nFor a figure that prints no numbers, what it plots is the claim, so we counted the plotted quantities and how many the rewrite reproduces. A figure never got a pass just for having no printed numbers.\nThe README reports each covered fraction.\n\nTwo things caught us out when joining the article’s list to the pipeline’s output. A join that silently matches nothing produces empty values that look like “couldn’t check” rather than “missing”, and a join that matches one row to several quietly duplicates rows. We checked every join in both directions and confirmed that each matched one row to one row. We also stopped selecting rows by their published value, which guarantees a match.\nFinally, we read multi-column tables from the rendered page rather than from text extracted from the PDF. Text extraction can scramble columns, and a misread cell produces an erratum that isn’t real.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 2: Ground truth"
+    ]
+  },
+  {
+    "objectID": "stages/02_ground_truth.html#done-when",
+    "href": "stages/02_ground_truth.html#done-when",
+    "title": "Stage 2: Ground truth",
+    "section": "Done when",
+    "text": "Done when\nThe build script runs as the last step of run_all.R, and it stops if any printed value has been read as a number, if any failing row lacks a defect_locus or any matching row has one, if any paper_internal row lacks a disposition, if any join is not one-to-one, or if any published table or figure is missing from float_coverage.csv.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 2: Ground truth"
+    ]
+  },
+  {
+    "objectID": "stages/04_claims.html",
+    "href": "stages/04_claims.html",
+    "title": "Stage 4: Claims",
+    "section": "",
+    "text": "The ground truth checks numbers against the pipeline. Stage 4 checks the text: every claim the article makes, numeric or not, gets extracted, classified, and checked a second way, by code that quotes the sentence and recomputes what it says.\nWe added this stage after finding that the ground truth alone missed a large share of the errors. Rerunning the code found well under half of the errata in our collection; reading the articles against themselves, their appendices, and their code found about as many again. A pipeline that reproduces every table can still sit under a paper whose text says something the tables don’t.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 4: Claims"
+    ]
+  },
+  {
+    "objectID": "stages/04_claims.html#extracting-the-claims",
+    "href": "stages/04_claims.html#extracting-the-claims",
+    "title": "Stage 4: Claims",
+    "section": "Extracting the claims",
+    "text": "Extracting the claims\nground_truth/published_claims.csv lists every claim in the article and appendix:\nclaim_id, location, claim_type, claim, value_paper, digits, comparison, expect, needs_block, notes\nWe built it in two passes. The first extracts every numeric token from the text mechanically, and a second sweep catches numbers written as words (“two-thirds of respondents”, “in all but one study”). Each candidate is then classified by hand:\n\n\n\n\n\n\n\nclaim_type\nWhat it is\n\n\n\n\npipeline\nA number the analysis produces: an estimate, a standard error, a p-value, a sample size.\n\n\ndescriptive\nA claim about the results that may print no number at all (see below).\n\n\ndefinitional\nA number that defines the design: the number of treatment arms, a scale’s range, a survey wave’s date.\n\n\nstructural\nA number about the paper itself: “three experiments”, “Table 2 shows”.\n\n\ntranscribed\nA number quoted from somewhere else, such as another study’s estimate.\n\n\n\nneeds_block is TRUE for every pipeline and descriptive claim, and for the definitional and structural claims the pipeline can actually reach. value_paper is stored as text, for the reasons given in Stage 2.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 4: Claims"
+    ]
+  },
+  {
+    "objectID": "stages/04_claims.html#claims-without-numbers",
+    "href": "stages/04_claims.html#claims-without-numbers",
+    "title": "Stage 4: Claims",
+    "section": "Claims without numbers",
+    "text": "Claims without numbers\nThe claims most likely to change a reader’s conclusion often print no number. A numeric sweep can’t see them, so we read for them directly, looking for the verbs and phrases of comparison and inference:\n\nsignificance: “statistically significant”, “cannot be distinguished from zero”;\ndirection: “larger among Republicans”, “the effect reverses”;\norder: “the largest effect”, “smaller than the misinformation effect”;\npersistence: “remains detectable after two weeks”;\ncounts in words: “most of the 24 experiments”, “in every study”.\n\nEach becomes a descriptive claim, and its check tests the statement against the rewrite’s output: is the interval clear of zero, is one estimate larger than the other, does the effect still appear at the later wave. The first error we found that changed a conclusion was a claim of this kind. An article reported that the effects of fact-checks remained detectable more than two weeks after exposure; once a coding error was corrected, the two-week estimate could not be distinguished from zero. No single number in that sentence was the problem. The claim was.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 4: Claims"
+    ]
+  },
+  {
+    "objectID": "stages/04_claims.html#the-second-check",
+    "href": "stages/04_claims.html#the-second-check",
+    "title": "Stage 4: Claims",
+    "section": "The second check",
+    "text": "The second check\nmaintained/in_text_claims.R has one block for each claim that needs one. Each block quotes the sentence verbatim and recomputes the claim from the rewrite’s output files or its cleaned data. It never refits a model, and it never reads the ground truth, so that the two checks are independent: the ground truth compares tables with the pipeline, while this file compares the prose with the pipeline. When both agree that a number is wrong, we can be confident it is.\nEach block prints one line in a fixed format:\nCLAIM &lt;claim_id&gt; = &lt;computed value&gt; || [verdict] &lt;label&gt;\nThe verdicts that pass are:\n\n\n\nverdict\nmeaning\n\n\n\n\nmatch\nThe computed value, at the printed precision, equals the printed value.\n\n\ncorrected\nThe printed value is wrong, and an erratum already corrects it (so the check expects the corrected value).\n\n\nrange\nThe claim states a range or a bound, and the block tests that the computed value falls within it.\n\n\nderived\nThe printed number is computed from other printed numbers, and the block tests that the arithmetic holds.\n\n\nhedged\nA descriptive claim, such as a hedged number (“about”, “roughly”), whose printed digits the computed value does not reproduce. The check does not apply the half-step bound from rules/rounding.md on its own, so the block must.\n\n\nshape\nA claim that prints no number, or a claim about direction, order, or significance that the block has tested.\n\n\nabsent\nThe claim refers to something the pipeline was never going to produce, and this is recorded.\n\n\n\nOnly match, corrected, and the failing verdicts are decided by the check itself. The others record a test the block has to carry out, so a block that declares one without testing anything still passes; these blocks deserve the closest reading.\nThe verdicts that fail are MISMATCH (the value is wrong and no erratum covers it), STALE (an erratum says the value is wrong, but the pipeline now reproduces the printed one), DRIFT (an erratum corrects the claim, and the value now agrees with neither the printed value nor the correction), and MISSING (a claim that needs a block has none). The file ends with a summary line that counts each verdict, and the run fails on any failing verdict.\nIn R, the package excheckr implements these verdicts (claim_start(), claim(), and claim_summary()). The table above is the specification, and the logic is simple enough to rewrite in Stata or Python; see languages.md.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 4: Claims"
+    ]
+  },
+  {
+    "objectID": "stages/04_claims.html#making-sure-every-claim-is-checked",
+    "href": "stages/04_claims.html#making-sure-every-claim-is-checked",
+    "title": "Stage 4: Claims",
+    "section": "Making sure every claim is checked",
+    "text": "Making sure every claim is checked\nAn early lesson: a claims file can look complete while checking nothing. In R, a script run with source() prints nothing unless told to, so dozens of blocks appeared to cover their claims while producing no output at all. The check that caught it was simple, and we now run it every time: run the file on its own, count the CLAIM lines it prints, and confirm that the count equals the number of needs_block rows in published_claims.csv, and that the printed IDs are exactly the declared ones.\nWe also reconcile the two instruments with each other. Every claim that appears in both the ground truth and the claims file must have the same printed value and the same classification, and where both compute a value, they must agree. Agreement has a limit worth stating: two checks can agree on a number and still both compute the wrong quantity for the sentence. The sentence-by-sentence quotes in the claims file are there so that a person can read each block and confirm that it computes what the sentence actually says.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 4: Claims"
+    ]
+  },
+  {
+    "objectID": "stages/04_claims.html#text-with-no-counterpart-in-the-output",
+    "href": "stages/04_claims.html#text-with-no-counterpart-in-the-output",
+    "title": "Stage 4: Claims",
+    "section": "Text with no counterpart in the output",
+    "text": "Text with no counterpart in the output\nSome claims refer to something the rewrite doesn’t produce. We sorted these into a few cases:\n\nA gap in the rewrite: the quantity should have been written out. We added it to the relevant script.\nThe deposited code contradicts the claim, or never computed it: the claim gets the locus archive.\nNothing in the paper or the deposit identifies the quantity: we recorded that, and did not invent a computation to check it against.\nThe deposit was never going to contain it (a date, a design detail): it is definitional, with no locus.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 4: Claims"
+    ]
+  },
+  {
+    "objectID": "stages/04_claims.html#done-when",
+    "href": "stages/04_claims.html#done-when",
+    "title": "Stage 4: Claims",
+    "section": "Done when",
+    "text": "Done when\nEvery claim in the article and appendix is in published_claims.csv, every claim that needs a check has one, the printed count equals the declared count, the two instruments agree, and the summary line shows no failing verdicts.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 4: Claims"
+    ]
+  },
+  {
+    "objectID": "stages/06_publish.html",
+    "href": "stages/06_publish.html",
+    "title": "Stage 6: Report and publish",
+    "section": "",
+    "text": "The last stage makes the work findable and keeps it working: a README that explains the repository to a stranger, a permanent DOI, a link from the original deposit, and a scheduled check that reruns everything.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 6: Report and publish"
+    ]
+  },
+  {
+    "objectID": "stages/06_publish.html#the-readme",
+    "href": "stages/06_publish.html#the-readme",
+    "title": "Stage 6: Report and publish",
+    "section": "The README",
+    "text": "The README\nREADME.qmd renders to the repository’s README.md (and, for us, to a PDF report as well). We wrote it for someone who has never heard of the project and has just landed on the repository from the article. Ours cover, in order: what the repository is, with a table of verified DOIs (article, deposit, and this repository’s own); how to run it; an overview of the paper; whether the deposited archive runs; the errata, with a pointer to the PDF; the ground truth and how much of each table and figure it covers; the two claim checks; the rewrite; and the software environment.\nEvery quantity in the README’s prose is computed by an inline chunk rather than typed. Ours started out with typed numbers, and they went stale quickly: one README misstated a subset count by 150,000 after the pipeline changed underneath it.\nWe kept the README about the paper, and left out the history of the project: no “an earlier version of this repository found”, no dates of earlier passes. A reader who never saw an earlier mistake doesn’t need to hear about its correction.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 6: Report and publish"
+    ]
+  },
+  {
+    "objectID": "stages/06_publish.html#the-repository",
+    "href": "stages/06_publish.html#the-repository",
+    "title": "Stage 6: Report and publish",
+    "section": "The repository",
+    "text": "The repository\nEach paper got its own public repository, licensed CC0, with run_all.R as the entry point. The deposit itself is never copied in; download_original.R fetches it. Before publishing, we ran the whole pipeline once more and confirmed that it left no stray or changed files, and we checked file paths against a case-sensitive file system, since one repository worked on a Mac and failed on Linux over the capitalization of a single file name.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 6: Report and publish"
+    ]
+  },
+  {
+    "objectID": "stages/06_publish.html#a-permanent-doi",
+    "href": "stages/06_publish.html#a-permanent-doi",
+    "title": "Stage 6: Report and publish",
+    "section": "A permanent DOI",
+    "text": "A permanent DOI\nGitHub isn’t an archive, and neither is a personal website. We archived each repository at Zenodo, which mints a concept DOI that always resolves to the latest version, plus a version DOI for each release. Zenodo makes a new version only when you publish a GitHub release, so routine maintenance doesn’t mint new DOIs; we cut a release when the errata or the maintained code changed in a way worth archiving.\nA .zenodo.json in the repository sets the record’s title, creators, license, and related identifiers: the article (isSupplementTo), the original deposit (isDerivedFrom), and the GitHub repository itself. One thing caught us: once .zenodo.json lists related identifiers, Zenodo stops adding the link to the GitHub repository on its own, so it has to be listed explicitly.\nThe concept DOI then goes in the README and in the errata note, so that the PDF, wherever it travels, points back to the maintained code.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 6: Report and publish"
+    ]
+  },
+  {
+    "objectID": "stages/06_publish.html#linking-the-deposit-back",
+    "href": "stages/06_publish.html#linking-the-deposit-back",
+    "title": "Stage 6: Report and publish",
+    "section": "Linking the deposit back",
+    "text": "Linking the deposit back\nA reader who starts from the article follows its DOI to the original deposit. For them to find the maintained version, the deposit has to point to it. On Dataverse we added a line to each deposit’s Related Material field, giving the Zenodo DOI and the repository URL. A metadata-only change publishes a minor version (1.1, say) with the files untouched. On OSF, which has no such field, the line went into the project description.\nSome details from doing this for all of our deposits:\n\nDeposits in your own Dataverse collection can be published directly. Deposits in a journal’s collection usually go to the journal’s curators for review, which on Harvard Dataverse means agreeing to a short attestation and waiting.\nSome older deposits lacked fields that Dataverse now requires (a subject, a contact email), and couldn’t be saved until those were filled in.\nDeposits made by a coauthor or by the journal can only be edited by them.\nHarvard Dataverse runs an automated metadata check on publication, and it held one of ours for staff review.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 6: Report and publish"
+    ]
+  },
+  {
+    "objectID": "stages/06_publish.html#the-scheduled-check",
+    "href": "stages/06_publish.html#the-scheduled-check",
+    "title": "Stage 6: Report and publish",
+    "section": "The scheduled check",
+    "text": "The scheduled check\nActive maintenance only works if someone notices when the code stops working. Each repository carries a short GitHub Actions workflow that calls a shared one in active-maintenance-aec/maintenance, which reruns run_all.R on current R and current packages, every eight weeks, with the repositories staggered so that a handful run each week. The check fails if the pipeline breaks or if any committed file it judges changes.\nA few choices made the check useful rather than noisy:\n\nNumbers are judged; figure files are not. A PDF or PNG drawn on Linux is never byte-identical to one drawn on a Mac, so figure files are counted but don’t fail the check. Every figure’s plotted values are saved as a CSV, and those are judged.\nFloating-point noise is forgiven. Linux and macOS differ in the last bits of some floating-point results, so a CSV whose only differences fall within a relative tolerance of one in a million is counted as noise.\nThe schedule stays alive. GitHub disables a scheduled workflow after 60 days without activity in the repository, which a maintained repository can easily go. The workflow re-enables itself every week.\nVery slow pipelines get a shorter run. GitHub limits a job to six hours. One of our pipelines takes far longer than that, so on GitHub it skips its slowest deposited scripts and judges everything else, and the full run happens locally.\n\nWhen the check fails, the cause is usually a package update. The rewrite is meant to be current code, so the response is to update the rewrite, not to pin the old package version; if a published number moves, the ground truth records it as an environment difference and the errata note updates when it next renders.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 6: Report and publish"
+    ]
+  },
+  {
+    "objectID": "stages/06_publish.html#done-when",
+    "href": "stages/06_publish.html#done-when",
+    "title": "Stage 6: Report and publish",
+    "section": "Done when",
+    "text": "Done when\nThe README renders with every number computed, the repository is public, its Zenodo DOI resolves and appears in the README and the errata, the original deposit links to it, and the scheduled check has passed at least once.",
+    "crumbs": [
+      "All maintained papers",
+      "Stages",
+      "Stage 6: Report and publish"
+    ]
+  }
+]

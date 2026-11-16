@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Stage 2: Ground truth – Active maintenance: a guide</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../stages/03_rewrite.html" rel="next">
+<link href="../stages/01_archive_check.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-b4ebf3249d5c643a07348443ae4db4df.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-431fdabd6ae11785433d602bdcb20d89.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;1,400&amp;family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&amp;family=IBM+Plex+Mono:wght@400&amp;display=swap" rel="stylesheet">
+
+
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../index.html">
+    <span class="navbar-title">Active maintenance: a guide</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="https://active-maintenance-aec.github.io/"> 
+<span class="menu-text">All maintained papers</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/active-maintenance-aec/guide"> <i class="bi bi-github" role="img">
+</i> 
+<span class="menu-text"></span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../stages/00_setup.html">Stages</a></li><li class="breadcrumb-item"><a href="../stages/02_ground_truth.html">Stage 2: Ground truth</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Stages</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../stages/00_setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 0: Setup and style</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../stages/01_archive_check.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 1: Archive check</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../stages/02_ground_truth.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Stage 2: Ground truth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../stages/03_rewrite.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 3: Maintained rewrite</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../stages/04_claims.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 4: Claims</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../stages/05_errata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 5: Errata</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../stages/06_publish.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 6: Report and publish</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Rules</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rules/erratum.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">What counts as an erratum</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rules/rounding.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Rounding</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rules/stochastic.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Numbers that come from random draws</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../rules/severity.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Which errors go to the journal</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Schemas</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../schemas/README.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../schemas/original_manifest.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Deposit manifest</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../schemas/archive_run_status.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Archive run</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../schemas/archive_overwrites.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Archive overwrites</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../schemas/published_claims.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Claims extraction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../schemas/ground_truth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Ground truth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../schemas/float_coverage.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Float coverage</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../schemas/errata_entries.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Errata</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../traps.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Traps</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../languages.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Languages other than R</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">For agents</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent/README.md" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent/session_start.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Session start</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent/00_setup.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 0 for agents: setup and style</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent/01_archive_check.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 1 for agents: archive check</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent/02_ground_truth.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 2 for agents: ground truth</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent/03_rewrite.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 3 for agents: maintained rewrite</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent/04_claims.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 4 for agents: claims</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent/05_errata.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 5 for agents: errata</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../agent/06_publish.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Stage 6 for agents: report and publish</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul class="collapse">
+  <li><a href="#the-table" id="toc-the-table" class="nav-link active" data-scroll-target="#the-table">The table</a></li>
+  <li><a href="#when-two-numbers-match" id="toc-when-two-numbers-match" class="nav-link" data-scroll-target="#when-two-numbers-match">When two numbers match</a></li>
+  <li><a href="#numbers-that-come-from-random-draws" id="toc-numbers-that-come-from-random-draws" class="nav-link" data-scroll-target="#numbers-that-come-from-random-draws">Numbers that come from random draws</a></li>
+  <li><a href="#where-the-problem-is-defect_locus" id="toc-where-the-problem-is-defect_locus" class="nav-link" data-scroll-target="#where-the-problem-is-defect_locus">Where the problem is: <code>defect_locus</code></a></li>
+  <li><a href="#what-was-done-about-it-disposition" id="toc-what-was-done-about-it-disposition" class="nav-link" data-scroll-target="#what-was-done-about-it-disposition">What was done about it: <code>disposition</code></a></li>
+  <li><a href="#coverage" id="toc-coverage" class="nav-link" data-scroll-target="#coverage">Coverage</a></li>
+  <li><a href="#done-when" id="toc-done-when" class="nav-link" data-scroll-target="#done-when">Done when</a></li>
+  </ul>
+<div class="toc-actions"><ul class="collapse"><li><a href="https://github.com/active-maintenance-aec/guide/blob/main/stages/02_ground_truth.md" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/active-maintenance-aec/guide/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../stages/00_setup.html">Stages</a></li><li class="breadcrumb-item"><a href="../stages/02_ground_truth.html">Stage 2: Ground truth</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Stage 2: Ground truth</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>The ground truth is one table, built by a script, that lists every number the paper prints and compares each with the value the original code produces and the value the maintained rewrite produces. Every erratum about a number traces back to a row in it, and every claim that the rewrite reproduces the paper rests on it.</p>
+<p>We settled on two principles for it, both learned the hard way.</p>
+<p><strong>Start from the article.</strong> We list what the paper prints first, and only then join that list to what the pipeline computes. Our earliest attempts went the other way, starting from the code’s output, and they were blind to any number the code never computed. Those turned out to be some of the most error-prone numbers of all: values typed into the text by hand, or left over from an earlier draft.</p>
+<p><strong>Generate it rather than type it.</strong> The only values in the table that a person types are the printed ones, transcribed from the published page. The archive’s values come from running the deposited code, the rewrite’s values are read from its output files, and the verdicts are computed. In one early repository, the comparison values had been typed in by hand too, and every row “matched”, which meant the table couldn’t have detected a problem if there had been one.</p>
+<section id="the-table" class="level2">
+<h2 class="anchored" data-anchor-id="the-table">The table</h2>
+<p><code>ground_truth/&lt;paper_id&gt;_ground_truth.csv</code> is written by <code>ground_truth/build_ground_truth.R</code>, which <code>run_all.R</code> runs last:</p>
+<p><code>paper_id, claim_id, location, claim_type, claim, value_paper, digits, value_script, match, value_rewrite, match_rewrite, holds, defect_locus, disposition, disposition_reason, notes</code></p>
+<ul>
+<li><code>location</code> says where the number is printed: a table or figure, a page and paragraph, a footnote, or an appendix section.</li>
+<li><code>value_paper</code> is the number exactly as printed, stored as text. Reading it as a number throws information away: <code>0.80</code> becomes <code>0.8</code>, <code>-0.00</code> becomes <code>0</code>, and the printed precision, which is part of what the paper claims, is lost. We had this happen in several repositories before we started forcing the column to be read as text everywhere.</li>
+<li><code>digits</code> is the precision the page prints, recorded for each row.</li>
+<li><code>value_script</code> comes from running the deposited code in Stage 1, and is left empty where the archive couldn’t be run.</li>
+<li><code>value_rewrite</code> is read from the rewrite’s output at full precision.</li>
+<li><code>match</code>, <code>match_rewrite</code>, and <code>holds</code> take the values <code>TRUE</code>, <code>FALSE</code>, or empty.</li>
+</ul>
+<p>The full definitions are in <a href="../schemas/ground_truth.html"><code>schemas/ground_truth.md</code></a>.</p>
+</section>
+<section id="when-two-numbers-match" class="level2">
+<h2 class="anchored" data-anchor-id="when-two-numbers-match">When two numbers match</h2>
+<p>A computed value matches a printed one when, rounded to the precision the page prints, it gives the same digits. Before comparing, both sides get the same clean-up: a missing leading zero restored, a typographic minus sign replaced, thousands separators removed, and a negative zero treated as zero. A tiny tolerance (<code>1e-9</code>) absorbs floating-point representation, and nothing else.</p>
+<p>Three refinements came up often enough to write down:</p>
+<ul>
+<li><strong>Hedged numbers.</strong> When the text itself hedges (“about 40 percent”, “roughly”, “nearly”, “on the order of”), we compared within half a step of the sentence’s own precision. When the text states an approximate number without a hedge, we held it to its printed digits: a sentence that says 40 percent about a value of 38 percent is an error.</li>
+<li><strong>Differences of printed values.</strong> When the text reports a difference between two printed cells, we allowed one unit in the last digit, since each cell was rounded separately.</li>
+<li><strong>The archive’s precision.</strong> We compared the archive’s value at the coarser of the page’s precision and the precision at which the deposited code itself prints.</li>
+</ul>
+<p>More detail and examples are in <a href="../rules/rounding.html"><code>rules/rounding.md</code></a>.</p>
+</section>
+<section id="numbers-that-come-from-random-draws" class="level2">
+<h2 class="anchored" data-anchor-id="numbers-that-come-from-random-draws">Numbers that come from random draws</h2>
+<p>Bootstrap intervals, randomization-inference p-values, simulated power, and anything else based on random draws can differ from run to run, and between software versions even with the same seed. Before putting a difference down to randomness, we checked that the procedure actually draws at random; more than once, a difference that looked like noise was a deterministic bug. For a value the paper reports without a seed, we compared it with the distribution of that value over many seeds, left <code>match_rewrite</code> empty, and recorded in <code>holds</code> whether the printed value was consistent with that distribution. A printed value far outside any reasonable draw counts as an error; one inside the range doesn’t. See <a href="../rules/stochastic.html"><code>rules/stochastic.md</code></a>.</p>
+</section>
+<section id="where-the-problem-is-defect_locus" class="level2">
+<h2 class="anchored" data-anchor-id="where-the-problem-is-defect_locus">Where the problem is: <code>defect_locus</code></h2>
+<p>Each row where a comparison fails (<code>match</code>, <code>match_rewrite</code>, or <code>holds</code> is <code>FALSE</code>) records where the problem lies:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><code>defect_locus</code></th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>paper_internal</code></td>
+<td>The printed text is wrong: the code produces one number and the page prints another (a typo, a stale number, a rounding slip, a transposed cell).</td>
+</tr>
+<tr class="even">
+<td><code>archive</code></td>
+<td>The deposited code is wrong: it produces a number that a corrected computation doesn’t, and the page printed what the code produced.</td>
+</tr>
+<tr class="odd">
+<td><code>environment</code></td>
+<td>The software changed: the deposited code, run today, gives a different number than it did then.</td>
+</tr>
+<tr class="even">
+<td><code>rewrite</code></td>
+<td>The maintained rewrite is wrong. We fixed these, so none should remain at the end.</td>
+</tr>
+<tr class="odd">
+<td><code>upstream</code></td>
+<td>The problem is in something the paper relied on, such as a dataset or an estimate it reused.</td>
+</tr>
+<tr class="even">
+<td><code>unresolved</code></td>
+<td>We looked, and couldn’t tell.</td>
+</tr>
+</tbody>
+</table>
+<p>The rule cuts both ways: a failing row gets a locus, and a row where everything matches doesn’t. A row with no verdict, such as an unseeded value, may or may not.</p>
+<p>One case is easy to miss. Sometimes the page, the archive, and the rewrite all agree, yet the number is wrong, because the deposited code has a bug and the rewrite faithfully reproduced it before the bug was found. Every comparison “matches”, and the paper is still in error. We record those rows with the locus <code>archive</code>, and only when an erratum names them.</p>
+<p>We set the locus where each row is built, rather than as a default for the whole table, and put any second contributing cause in <code>notes</code>.</p>
+</section>
+<section id="what-was-done-about-it-disposition" class="level2">
+<h2 class="anchored" data-anchor-id="what-was-done-about-it-disposition">What was done about it: <code>disposition</code></h2>
+<p>Each row with a defect also records what happened to it:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th><code>disposition</code></th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>corrected_here</code></td>
+<td>An entry in this repository’s errata corrects it. This one is computed from the errata, never entered by hand.</td>
+</tr>
+<tr class="even">
+<td><code>corrected_by_journal</code></td>
+<td>A published corrigendum or erratum corrects it.</td>
+</tr>
+<tr class="odd">
+<td><code>documented_only</code></td>
+<td>Recorded here and deliberately not corrected (a value within simulation noise, for example).</td>
+</tr>
+<tr class="even">
+<td><code>not_corrected</code></td>
+<td>Known, and left uncorrected for a stated reason.</td>
+</tr>
+<tr class="odd">
+<td>empty</td>
+<td>Nobody has decided yet.</td>
+</tr>
+</tbody>
+</table>
+<p>The three judgment values come with a <code>disposition_reason</code>. The build stops if any <code>paper_internal</code> row has no disposition, since an error in the printed text that nobody has decided about is unfinished business.</p>
+<p>The dispositions line up with the choice an author faces for each error: fix it in your own errata, send it to the journal, or record it and move on. <a href="../rules/severity.html"><code>rules/severity.md</code></a> describes how we made that choice.</p>
+</section>
+<section id="coverage" class="level2">
+<h2 class="anchored" data-anchor-id="coverage">Coverage</h2>
+<p>Our first coverage check asked only whether every table had at least one row in the ground truth, and it passed while missing most of the numbers on some tables. We now report coverage table by table and figure by figure, as a fraction, in <code>ground_truth/float_coverage.csv</code>:</p>
+<p><code>float, published_numbers, covered, reproduced_by_rewrite, reproduced_by_archive, plotted, plotted_reproduced, note</code></p>
+<ul>
+<li>The list of tables and figures comes from the article itself, and we checked it in both directions: every table and figure in the article has a row, and every row names one that the article contains.</li>
+<li><code>published_numbers</code> counts the numbers printed on each table or figure, and <code>covered</code> counts how many of them have a row in the ground truth.</li>
+<li>For a figure that prints no numbers, what it plots is the claim, so we counted the plotted quantities and how many the rewrite reproduces. A figure never got a pass just for having no printed numbers.</li>
+<li>The README reports each covered fraction.</li>
+</ul>
+<p>Two things caught us out when joining the article’s list to the pipeline’s output. A join that silently matches nothing produces empty values that look like “couldn’t check” rather than “missing”, and a join that matches one row to several quietly duplicates rows. We checked every join in both directions and confirmed that each matched one row to one row. We also stopped selecting rows by their published value, which guarantees a match.</p>
+<p>Finally, we read multi-column tables from the rendered page rather than from text extracted from the PDF. Text extraction can scramble columns, and a misread cell produces an erratum that isn’t real.</p>
+</section>
+<section id="done-when" class="level2">
+<h2 class="anchored" data-anchor-id="done-when">Done when</h2>
+<p>The build script runs as the last step of <code>run_all.R</code>, and it stops if any printed value has been read as a number, if any failing row lacks a <code>defect_locus</code> or any matching row has one, if any <code>paper_internal</code> row lacks a disposition, if any join is not one-to-one, or if any published table or figure is missing from <code>float_coverage.csv</code>.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/active-maintenance-aec\.github\.io\/guide\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../stages/01_archive_check.html" class="pagination-link" aria-label="Stage 1: Archive check">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Stage 1: Archive check</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../stages/03_rewrite.html" class="pagination-link" aria-label="Stage 3: Maintained rewrite">
+        <span class="nav-page-text">Stage 3: Maintained rewrite</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/active-maintenance-aec/guide/blob/main/stages/02_ground_truth.md" class="toc-action"><i class="bi bi-github"></i>View source</a></li><li><a href="https://github.com/active-maintenance-aec/guide/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></div></div></footer></body></html>
