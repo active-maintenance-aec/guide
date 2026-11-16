@@ -33,7 +33,7 @@ We ran each deposited script in a scratch copy of the deposit (never in the down
 `pass, script, role, exit_status, outcome, stopped_at`
 
 - `pass` is `as_shipped` (the deposit exactly as downloaded) or `stripped` (only the raw data and the code, with any intermediate files the deposit included removed). We ran both, because a deposit that includes its own intermediate files can make a script look fine when the script that should have produced those files is broken.
-- `role` is `cleaning`, `analysis`, `helper`, or `other`.
+- `role` is `cleaning`, `analysis`, or `other`. A helper file that is only ever sourced by other scripts gets no row, since it never runs on its own.
 - `outcome` is `clean`, `error`, `timeout`, or `not_run`. Scripts we couldn't run at all (several needed Stata, which we didn't have) still got rows, with `not_run` and the reason in `stopped_at`.
 
 Where it mattered, we ran under the conditions of the paper's day. R changed its default random-number sampler in version 3.6.0 (April 2019), so for older code we set `RNGkind(sample.kind = "Rounding")` when checking whether the archive reproduced its own published draws. The rewrite uses the current default, and any number that moves because of it is recorded as an `environment` difference (see [Stage 2](02_ground_truth.md)).
@@ -44,7 +44,7 @@ Before running, we searched the deposited code for anything that writes a file, 
 
 `pass, file, effect, matches_deposit`
 
-`effect` is `added`, `overwritten`, `rebuilt`, or `deleted`, and `matches_deposit` says whether a file the run rewrote came out identical to the deposited one. When a run overwrote a deposited output with something different, that told us something: either the deposited output came from different code than what was deposited, or the software had moved. Running in a scratch copy is what made this table possible, and it also kept the runs from quietly altering the deposit we were trying to document.
+`effect` is `added`, `overwritten`, `rebuilt`, `withheld` (an intermediate removed for the stripped pass that nothing rebuilt), or `deleted`, and `matches_deposit` says whether a file the run rewrote came out identical to the deposited one. When a run overwrote a deposited output with something different, that told us something: either the deposited output came from different code than what was deposited, or the software had moved. Running in a scratch copy is what made this table possible, and it also kept the runs from quietly altering the deposit we were trying to document.
 
 ## Diagnosing failures
 
