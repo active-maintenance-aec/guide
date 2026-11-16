@@ -1,0 +1,88 @@
+project:
+  type: website
+  output-dir: _site
+  render:
+    - "*.qmd"
+    - "*.md"
+    - "!/README.md"
+
+website:
+  title: "Active maintenance: a guide"
+  site-url: https://active-maintenance-aec.github.io/guide/
+  repo-url: https://github.com/active-maintenance-aec/guide
+  repo-actions: [source, issue]
+  page-navigation: true
+  search: true
+  navbar:
+    left:
+      - text: "All maintained papers"
+        href: https://active-maintenance-aec.github.io/
+    right:
+      - icon: github
+        href: https://github.com/active-maintenance-aec/guide
+  sidebar:
+    style: docked
+    contents:
+      - text: Overview
+        href: index.qmd
+      - section: Stages
+        contents:
+          - stages/00_setup.md
+          - stages/01_archive_check.md
+          - stages/02_ground_truth.md
+          - stages/03_rewrite.md
+          - stages/04_claims.md
+          - stages/05_errata.md
+          - stages/06_publish.md
+      - section: Rules
+        contents:
+          - rules/erratum.md
+          - rules/rounding.md
+          - rules/stochastic.md
+          - rules/severity.md
+      - section: Schemas
+        contents:
+          - text: Overview
+            href: schemas/README.md
+          - text: "Deposit manifest"
+            href: schemas/original_manifest.md
+          - text: "Archive run"
+            href: schemas/archive_run_status.md
+          - text: "Archive overwrites"
+            href: schemas/archive_overwrites.md
+          - text: "Claims extraction"
+            href: schemas/published_claims.md
+          - text: "Ground truth"
+            href: schemas/ground_truth.md
+          - text: "Float coverage"
+            href: schemas/float_coverage.md
+          - text: "Errata"
+            href: schemas/errata_entries.md
+      - traps.md
+      - languages.md
+      - section: For agents
+        contents:
+          - text: Overview
+            href: agent/README.md
+          - agent/session_start.md
+          - agent/00_setup.md
+          - agent/01_archive_check.md
+          - agent/02_ground_truth.md
+          - agent/03_rewrite.md
+          - agent/04_claims.md
+          - agent/05_errata.md
+          - agent/06_publish.md
+
+format:
+  html:
+    theme:
+      - cosmo
+      - brand.scss
+    highlight-style: gruvbox-light
+    include-in-header: _in_header.html
+    toc: true
+    toc-depth: 2
+    anchor-sections: true
+
+filters:
+  - _pagetitle.lua
