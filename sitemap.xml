@@ -2,118 +2,118 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/traps.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.680Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/stages/05_errata.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.680Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/stages/03_rewrite.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.680Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/stages/01_archive_check.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.680Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/schemas/published_claims.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/schemas/ground_truth.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/schemas/errata_entries.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/schemas/archive_overwrites.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/rules/severity.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/rules/erratum.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.678Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/agent/session_start.html</loc>
-    <lastmod>2026-11-16T17:56:33.675Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.678Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/agent/05_errata.html</loc>
-    <lastmod>2026-11-16T17:56:33.675Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.678Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/agent/03_rewrite.html</loc>
-    <lastmod>2026-11-16T17:56:33.675Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.678Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/agent/01_archive_check.html</loc>
-    <lastmod>2026-11-16T17:56:33.675Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.678Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/index.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.678Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/agent/00_setup.html</loc>
-    <lastmod>2026-11-16T17:56:33.675Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.676Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/agent/02_ground_truth.html</loc>
-    <lastmod>2026-11-16T17:56:33.675Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.678Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/agent/04_claims.html</loc>
-    <lastmod>2026-11-16T17:56:33.675Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.678Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/agent/06_publish.html</loc>
-    <lastmod>2026-11-16T17:56:33.675Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.678Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/languages.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.678Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/rules/rounding.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/rules/stochastic.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/schemas/archive_run_status.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/schemas/float_coverage.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/schemas/original_manifest.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/stages/00_setup.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.679Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/stages/02_ground_truth.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.680Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/stages/04_claims.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.680Z</lastmod>
   </url>
   <url>
     <loc>https://active-maintenance-aec.github.io/guide/stages/06_publish.html</loc>
-    <lastmod>2026-11-16T17:56:33.676Z</lastmod>
+    <lastmod>2026-11-16T19:27:53.680Z</lastmod>
   </url>
 </urlset>
