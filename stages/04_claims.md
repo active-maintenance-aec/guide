@@ -48,13 +48,15 @@ The verdicts that pass are:
 |---|---|
 | `match` | The computed value, at the printed precision, equals the printed value. |
 | `corrected` | The printed value is wrong, and an erratum already corrects it (so the check expects the corrected value). |
-| `range` | The claim states a range or a bound, and the computed value falls within it. |
-| `derived` | The printed number is computed from other printed numbers, and the arithmetic holds. |
-| `hedged` | The text hedges ("about", "roughly"), and the value is within half a step of its precision. |
-| `shape` | A descriptive claim (direction, order, significance) holds. |
+| `range` | The claim states a range or a bound, and the block tests that the computed value falls within it. |
+| `derived` | The printed number is computed from other printed numbers, and the block tests that the arithmetic holds. |
+| `hedged` | A `descriptive` claim, such as a hedged number ("about", "roughly"), whose printed digits the computed value does not reproduce. The check does not apply the half-step bound from [`rules/rounding.md`](../rules/rounding.md) on its own, so the block must. |
+| `shape` | A claim that prints no number, or a claim about direction, order, or significance that the block has tested. |
 | `absent` | The claim refers to something the pipeline was never going to produce, and this is recorded. |
 
-The verdicts that fail are `MISMATCH` (the value is wrong and no erratum covers it), `STALE` (an erratum says the value is wrong, but the pipeline now reproduces the printed one), `DRIFT` (the value has moved since the claim was last checked), and `MISSING` (a claim that needs a block has none). The file ends with a summary line that counts each verdict, and the run fails on any failing verdict.
+Only `match`, `corrected`, and the failing verdicts are decided by the check itself. The others record a test the block has to carry out, so a block that declares one without testing anything still passes; these blocks deserve the closest reading.
+
+The verdicts that fail are `MISMATCH` (the value is wrong and no erratum covers it), `STALE` (an erratum says the value is wrong, but the pipeline now reproduces the printed one), `DRIFT` (an erratum corrects the claim, and the value now agrees with neither the printed value nor the correction), and `MISSING` (a claim that needs a block has none). The file ends with a summary line that counts each verdict, and the run fails on any failing verdict.
 
 In R, the package `excheckr` implements these verdicts (`claim_start()`, `claim()`, and `claim_summary()`). The table above is the specification, and the logic is simple enough to rewrite in Stata or Python; see [`languages.md`](../languages.md).
 
