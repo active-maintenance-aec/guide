@@ -1,0 +1,39 @@
+# Active maintenance: a guide
+
+> How we actively maintained the replication archives of published papers with AI coding agents: the stages, the rules for judging errors, the output table schemas, known traps, and instructions written for agents.
+
+The whole guide in one file: https://active-maintenance-aec.github.io/guide/llms-full.txt
+
+## Pages, in reading order
+
+- [Active maintenance: a guide](https://active-maintenance-aec.github.io/guide/README.md)
+- [Stage 0: Setup and style](https://active-maintenance-aec.github.io/guide/stages/00_setup.md)
+- [Stage 1: Archive check](https://active-maintenance-aec.github.io/guide/stages/01_archive_check.md)
+- [Stage 2: Ground truth](https://active-maintenance-aec.github.io/guide/stages/02_ground_truth.md)
+- [Stage 3: Maintained rewrite](https://active-maintenance-aec.github.io/guide/stages/03_rewrite.md)
+- [Stage 4: Claims](https://active-maintenance-aec.github.io/guide/stages/04_claims.md)
+- [Stage 5: Errata](https://active-maintenance-aec.github.io/guide/stages/05_errata.md)
+- [Stage 6: Report and publish](https://active-maintenance-aec.github.io/guide/stages/06_publish.md)
+- [What counts as an erratum](https://active-maintenance-aec.github.io/guide/rules/erratum.md)
+- [Rounding](https://active-maintenance-aec.github.io/guide/rules/rounding.md)
+- [Numbers that come from random draws](https://active-maintenance-aec.github.io/guide/rules/stochastic.md)
+- [Which errors go to the journal](https://active-maintenance-aec.github.io/guide/rules/severity.md)
+- [Schemas](https://active-maintenance-aec.github.io/guide/schemas/README.md)
+- [original_manifest.csv](https://active-maintenance-aec.github.io/guide/schemas/original_manifest.md)
+- [ground_truth/archive_run_status.csv](https://active-maintenance-aec.github.io/guide/schemas/archive_run_status.md)
+- [ground_truth/archive_overwrites.csv](https://active-maintenance-aec.github.io/guide/schemas/archive_overwrites.md)
+- [ground_truth/published_claims.csv](https://active-maintenance-aec.github.io/guide/schemas/published_claims.md)
+- [ground_truth/<paper_id>_ground_truth.csv](https://active-maintenance-aec.github.io/guide/schemas/ground_truth.md)
+- [ground_truth/float_coverage.csv](https://active-maintenance-aec.github.io/guide/schemas/float_coverage.md)
+- [errata_entries.csv](https://active-maintenance-aec.github.io/guide/schemas/errata_entries.md)
+- [Traps](https://active-maintenance-aec.github.io/guide/traps.md)
+- [Languages other than R](https://active-maintenance-aec.github.io/guide/languages.md)
+- [Agent instructions](https://active-maintenance-aec.github.io/guide/agent/README.md)
+- [Session start](https://active-maintenance-aec.github.io/guide/agent/session_start.md)
+- [Stage 0 for agents: setup and style](https://active-maintenance-aec.github.io/guide/agent/00_setup.md)
+- [Stage 1 for agents: archive check](https://active-maintenance-aec.github.io/guide/agent/01_archive_check.md)
+- [Stage 2 for agents: ground truth](https://active-maintenance-aec.github.io/guide/agent/02_ground_truth.md)
+- [Stage 3 for agents: maintained rewrite](https://active-maintenance-aec.github.io/guide/agent/03_rewrite.md)
+- [Stage 4 for agents: claims](https://active-maintenance-aec.github.io/guide/agent/04_claims.md)
+- [Stage 5 for agents: errata](https://active-maintenance-aec.github.io/guide/agent/05_errata.md)
+- [Stage 6 for agents: report and publish](https://active-maintenance-aec.github.io/guide/agent/06_publish.md)
