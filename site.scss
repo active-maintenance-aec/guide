@@ -1,0 +1,16 @@
+/*-- scss:rules --*/
+
+// brand.scss paints the navbar parchment; Quarto's default navbar text assumes
+// a dark bar, so set the brand and icons to the body color.
+.navbar .navbar-brand,
+.navbar .navbar-title,
+.navbar .nav-link,
+.navbar .bi {
+  color: #3C444C !important;
+}
+
+// Schema pages are titled with a file path, which has no natural break point.
+h1.title code {
+  overflow-wrap: anywhere;
+  font-size: 0.8em;
+}

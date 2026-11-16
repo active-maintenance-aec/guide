@@ -14,6 +14,7 @@ website:
   page-navigation: true
   search: true
   navbar:
+    background: light
     left:
       - text: "All maintained papers"
         href: https://active-maintenance-aec.github.io/
@@ -78,6 +79,7 @@ format:
     theme:
       - cosmo
       - brand.scss
+      - site.scss
     highlight-style: gruvbox-light
     include-in-header: _in_header.html
     toc: true
